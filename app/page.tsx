@@ -1,3 +1,4 @@
+import Footer from './footer'
 import Features from './features'
 import Navbar from './navbar'
 import HowStrip from './howstrip'
@@ -78,6 +79,7 @@ export default function Home() {
         </button>
       </div>
       <HowStrip /><Features />
+      <Footer />
     </main>
   )
 }
