@@ -1,3 +1,4 @@
+import UseCases from './useCases'
 import Footer from './footer'
 import Features from './features'
 import Navbar from './navbar'
@@ -78,7 +79,7 @@ export default function Home() {
           See a demo
         </button>
       </div>
-      <HowStrip /><Features />
+      <HowStrip /><UseCases /><Features />
       <Footer />
     </main>
   )
