@@ -116,10 +116,16 @@ export default function Dashboard() {
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                     {!expired && (
-                      <button onClick={() => window.location.href = `/drop/${drop.slug}`} style={{
-                        background: '#EDE9F9', color: '#6040C8', fontSize: '12px',
-                        padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer'
-                      }}>View</button>
+                      <>
+                        <button onClick={() => window.location.href = `/drop/${drop.slug}`} style={{
+                          background: '#EDE9F9', color: '#6040C8', fontSize: '12px',
+                          padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer'
+                        }}>View</button>
+                        <button onClick={() => window.location.href = `/edit/${drop.slug}`} style={{
+                          background: '#F2F0F8', color: '#1C1830', fontSize: '12px',
+                          padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer'
+                        }}>Edit</button>
+                      </>
                     )}
                     <button onClick={() => {
                       navigator.clipboard.writeText(`picdrop.live/drop/${drop.slug}`)
