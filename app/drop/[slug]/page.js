@@ -140,8 +140,15 @@ export default function DropViewer() {
       {/* LIGHTBOX */}
       {lightbox !== null && (
         <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? '16px' : '24px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: '95vw', maxHeight: '90vh' }}>
-            <img src={photos[lightbox].url} style={{ maxWidth: '100%', maxHeight: '85vh', objectFit: 'contain', borderRadius: '4px' }} />
+          <div onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: '95vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <img src={photos[lightbox].url} style={{ maxWidth: '100%', maxHeight: photos[lightbox].caption ? '78vh' : '85vh', objectFit: 'contain', borderRadius: '4px', display: 'block' }} />
+            {photos[lightbox].caption && (
+              <div style={{ marginTop: '12px', padding: '8px 16px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', maxWidth: '500px' }}>
+                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4 }}>
+                  {photos[lightbox].caption}
+                </div>
+              </div>
+            )}
           </div>
           <div onClick={() => setLightbox(null)} style={{ position: 'fixed', top: '16px', right: '16px', fontSize: '28px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', zIndex: 201 }}>×</div>
           {lightbox > 0 && (
@@ -198,23 +205,24 @@ export default function DropViewer() {
             No photos yet
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: getGridCols(),
-            gap: isMobile && spacing.gap === '12px' ? '6px' : spacing.gap,
-            borderRadius: spacing.borderRadius,
-            overflow: 'hidden'
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: getGridCols(), gap: isMobile && spacing.gap === '12px' ? '6px' : spacing.gap, borderRadius: spacing.borderRadius, overflow: 'hidden' }}>
             {photos.map((p, i) => (
               <div key={i} onClick={() => setLightbox(i)} style={{
                 aspectRatio: !isMobile && drop.layout === 'masonry' && i === 0 ? 'unset' : '1',
                 gridRow: !isMobile && drop.layout === 'masonry' && i === 0 ? 'span 2' : 'auto',
-                overflow: 'hidden',
-                cursor: 'pointer',
+                overflow: 'hidden', cursor: 'pointer',
                 borderRadius: spacing.gap === '12px' ? '8px' : '0px',
-                border: drop.spacing === 'airy' ? `3px solid ${v.bg}` : 'none'
+                border: drop.spacing === 'airy' ? `3px solid ${v.bg}` : 'none',
+                position: 'relative'
               }}>
                 <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                {p.caption && (
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', padding: '16px 8px 6px', pointerEvents: 'none' }}>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.caption}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

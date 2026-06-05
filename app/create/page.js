@@ -10,6 +10,7 @@ export default function Create() {
   const [expiry, setExpiry] = useState(14)
   const [password, setPassword] = useState('')
   const [hasPassword, setHasPassword] = useState(false)
+  const [allowDownload, setAllowDownload] = useState(false)
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false)
   const [slugStatus, setSlugStatus] = useState('')
@@ -36,16 +37,21 @@ export default function Create() {
 
   const handlePhotos = (e) => {
     const files = Array.from(e.target.files)
-    const previews = files.map(file => ({
+    const newPhotos = files.map(file => ({
       file,
       url: URL.createObjectURL(file),
-      name: file.name
+      name: file.name,
+      caption: ''
     }))
-    setPhotos(prev => [...prev, ...previews])
+    setPhotos(prev => [...prev, ...newPhotos])
   }
 
   const removePhoto = (index) => {
     setPhotos(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const updatePhotoCaption = (index, value) => {
+    setPhotos(prev => prev.map((p, i) => i === index ? { ...p, caption: value } : p))
   }
 
   const checkSlug = async (val) => {
@@ -83,7 +89,8 @@ export default function Create() {
           font: selectedVibe.font,
           layout: selectedVibe.layout,
           spacing,
-          show_expiry: showExpiry
+          show_expiry: showExpiry,
+          allow_download: allowDownload
         })
         .select()
         .single()
@@ -95,7 +102,11 @@ export default function Create() {
         const fileName = `${drop.id}/${Date.now()}.${fileExt}`
         const { error: uploadError } = await supabase.storage.from('photos').upload(fileName, photo.file)
         if (uploadError) { alert('Upload error: ' + uploadError.message); setLoading(false); return }
-        await supabase.from('photos').insert({ drop_id: drop.id, file_path: fileName })
+        await supabase.from('photos').insert({
+          drop_id: drop.id,
+          file_path: fileName,
+          caption: photo.caption || ''
+        })
       }
 
       window.location.href = `/drop/${slug}`
@@ -136,7 +147,7 @@ export default function Create() {
         <div style={cardStyle}>
           <div style={secLabel}>Photos</div>
           <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.25)', borderRadius: '9px', padding: isMobile ? '28px 16px' : '40px 20px', textAlign: 'center', cursor: 'pointer' }}>
-            <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: 'none' }} capture={false} />
+            <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: 'none' }} />
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>📷</div>
             <div style={{ fontSize: '15px', fontWeight: '500', marginBottom: '4px', color: '#1C1830' }}>
               {isMobile ? 'Tap to add photos' : 'Click to upload photos'}
@@ -145,18 +156,35 @@ export default function Create() {
               {isMobile ? 'Choose from camera roll or take a photo' : 'JPG, PNG, HEIC · any number of photos'}
             </div>
           </label>
+
           {photos.length > 0 && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '70px' : '80px'}, 1fr))`, gap: '6px', marginTop: '14px' }}>
+            <div style={{ marginTop: '14px' }}>
+              <div style={{ fontSize: '12px', color: '#6B6485', marginBottom: '10px' }}>
+                {photos.length} photo{photos.length !== 1 ? 's' : ''} added · Add optional captions below each photo
+              </div>
+              <div style={{ display: 'grid', gap: '10px' }}>
                 {photos.map((p, i) => (
-                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '7px', overflow: 'hidden' }}>
-                    <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <div onClick={() => removePhoto(i)} style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', color: 'white' }}>×</div>
+                  <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <div style={{ position: 'relative', width: isMobile ? '72px' : '80px', height: isMobile ? '72px' : '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+                      <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div onClick={() => removePhoto(i)} style={{ position: 'absolute', top: '3px', right: '3px', width: '20px', height: '20px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '11px', color: 'white' }}>×</div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '12px', color: '#6B6485', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {p.name}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Add a caption (optional)"
+                        value={p.caption}
+                        onChange={e => updatePhotoCaption(i, e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '7px', fontSize: '13px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830' }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '8px' }}>{photos.length} photo{photos.length !== 1 ? 's' : ''} added</div>
-            </>
+            </div>
           )}
         </div>
 
@@ -282,15 +310,15 @@ export default function Create() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
             <div>
               <div style={{ fontSize: '14px', color: '#1C1830' }}>Allow download</div>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '2px' }}>Viewers can save all photos as a zip</div>
+              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '2px' }}>Viewers can save photos to their device</div>
             </div>
-            <Toggle value={true} onChange={() => {}} />
+            <Toggle value={allowDownload} onChange={setAllowDownload} />
           </div>
         </div>
 
         {/* PUBLISH */}
         <div style={{ display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row' }}>
-          <button onClick={handlePublish} disabled={loading} style={{ background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500', padding: '14px 28px', borderRadius: '9px', border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1, flex: isMobile ? 'unset' : 'unset' }}>
+          <button onClick={handlePublish} disabled={loading} style={{ background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500', padding: '14px 28px', borderRadius: '9px', border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Publishing...' : 'Publish drop'}
           </button>
           <button onClick={() => window.location.href = '/dashboard'} style={{ background: 'white', color: '#1C1830', fontSize: '15px', padding: '13px 24px', borderRadius: '9px', border: '1px solid rgba(83,74,183,0.25)', cursor: 'pointer' }}>
