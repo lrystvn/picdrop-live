@@ -13,6 +13,8 @@ export default function Create() {
   const [allowDownload, setAllowDownload] = useState(false)
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false)
+  const [loadingPhotos, setLoadingPhotos] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 })
   const [slugStatus, setSlugStatus] = useState('')
   const [vibe, setVibe] = useState('electric')
   const [spacing, setSpacing] = useState('normal')
@@ -37,13 +39,19 @@ export default function Create() {
 
   const handlePhotos = (e) => {
     const files = Array.from(e.target.files)
+    if (files.length === 0) return
+    setLoadingPhotos(true)
     const newPhotos = files.map(file => ({
       file,
       url: URL.createObjectURL(file),
       name: file.name,
       caption: ''
     }))
-    setPhotos(prev => [...prev, ...newPhotos])
+    // Small delay so loading state shows before heavy render
+    setTimeout(() => {
+      setPhotos(prev => [...prev, ...newPhotos])
+      setLoadingPhotos(false)
+    }, 50)
   }
 
   const removePhoto = (index) => {
@@ -66,7 +74,9 @@ export default function Create() {
     if (!title) { alert('Please add a title'); return }
     if (!slug) { alert('Please add a slug'); return }
     if (photos.length === 0) { alert('Please add at least one photo'); return }
+    if (photos.length > 50) { alert('Maximum 50 photos per drop. Please remove some and try again.'); return }
     setLoading(true)
+    setUploadProgress({ current: 0, total: photos.length })
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -97,23 +107,37 @@ export default function Create() {
 
       if (dropError) { alert('Drop error: ' + dropError.message); setLoading(false); return }
 
-      for (const photo of photos) {
-        const fileExt = photo.name.split('.').pop()
-        const fileName = `${drop.id}/${Date.now()}.${fileExt}`
-        const { error: uploadError } = await supabase.storage.from('photos').upload(fileName, photo.file)
-        if (uploadError) { alert('Upload error: ' + uploadError.message); setLoading(false); return }
-        await supabase.from('photos').insert({
-          drop_id: drop.id,
-          file_path: fileName,
-          caption: photo.caption || ''
-        })
+      // Upload all photos in parallel batches of 5
+      const BATCH_SIZE = 5
+      let completed = 0
+      const photoRecords = []
+
+      for (let i = 0; i < photos.length; i += BATCH_SIZE) {
+        const batch = photos.slice(i, i + BATCH_SIZE)
+        const batchResults = await Promise.all(
+          batch.map(async (photo) => {
+            const fileExt = photo.name.split('.').pop()
+            const fileName = `${drop.id}/${Date.now()}-${Math.random().toString(36).substr(2,6)}.${fileExt}`
+            const { error: uploadError } = await supabase.storage.from('photos').upload(fileName, photo.file)
+            if (uploadError) throw new Error('Upload error: ' + uploadError.message)
+            completed++
+            setUploadProgress({ current: completed, total: photos.length })
+            return { drop_id: drop.id, file_path: fileName, caption: photo.caption || '' }
+          })
+        )
+        photoRecords.push(...batchResults)
       }
+
+      // Insert all photo records at once
+      const { error: photoError } = await supabase.from('photos').insert(photoRecords)
+      if (photoError) throw new Error('Photo record error: ' + photoError.message)
 
       window.location.href = `/drop/${slug}`
     } catch (err) {
       alert('Something went wrong: ' + err.message)
+      setLoading(false)
+      setUploadProgress({ current: 0, total: 0 })
     }
-    setLoading(false)
   }
 
   const selectedVibe = vibes.find(v => v.id === vibe)
@@ -125,6 +149,44 @@ export default function Create() {
   const Toggle = ({ value, onChange }) => (
     <div onClick={() => onChange(!value)} style={{ width: '42px', height: '24px', borderRadius: '99px', cursor: 'pointer', background: value ? '#6040C8' : '#D3D1C7', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
       <div style={{ position: 'absolute', top: '3px', left: value ? '21px' : '3px', width: '18px', height: '18px', background: 'white', borderRadius: '50%', transition: 'left .2s' }} />
+    </div>
+  )
+
+  // Publishing overlay
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ textAlign: 'center', maxWidth: '320px', width: '100%' }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '21px', color: '#fff', marginBottom: '32px' }}>
+          Pic<span style={{ color: '#9B8FE4', fontStyle: 'italic' }}>drop</span>
+        </div>
+        <div style={{ fontSize: '18px', color: '#fff', fontFamily: 'Georgia, serif', marginBottom: '8px' }}>
+          {uploadProgress.current === 0 ? 'Creating your drop...' : `Uploading photos...`}
+        </div>
+        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginBottom: '24px' }}>
+          {uploadProgress.total > 0 && uploadProgress.current > 0
+            ? `${uploadProgress.current} of ${uploadProgress.total} photos uploaded`
+            : 'Just a moment...'}
+        </div>
+        {uploadProgress.total > 0 && (
+          <>
+            <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '99px', overflow: 'hidden', marginBottom: '10px' }}>
+              <div style={{
+                height: '100%',
+                width: `${(uploadProgress.current / uploadProgress.total) * 100}%`,
+                background: '#9B8FE4',
+                borderRadius: '99px',
+                transition: 'width .3s ease'
+              }} />
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>
+              {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
+            </div>
+          </>
+        )}
+        <div style={{ marginTop: '32px', fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
+          Don't close this page
+        </div>
+      </div>
     </div>
   )
 
@@ -153,14 +215,21 @@ export default function Create() {
               {isMobile ? 'Tap to add photos' : 'Click to upload photos'}
             </div>
             <div style={{ fontSize: '12px', color: '#6B6485' }}>
-              {isMobile ? 'Choose from camera roll or take a photo' : 'JPG, PNG, HEIC · any number of photos'}
+              {isMobile ? 'Choose from camera roll · max 50 photos' : 'JPG, PNG, HEIC · max 50 photos'}
             </div>
           </label>
 
-          {photos.length > 0 && (
+          {loadingPhotos && (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#6040C8', fontSize: '14px' }}>
+              ⏳ Loading your photos...
+            </div>
+          )}
+
+          {!loadingPhotos && photos.length > 0 && (
             <div style={{ marginTop: '14px' }}>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginBottom: '10px' }}>
-                {photos.length} photo{photos.length !== 1 ? 's' : ''} added · Add optional captions below each photo
+              <div style={{ fontSize: '12px', color: '#6B6485', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{photos.length} photo{photos.length !== 1 ? 's' : ''} added {photos.length >= 50 ? '· ⚠️ Limit reached' : ''}</span>
+                <span style={{ color: photos.length >= 45 ? '#A32D2D' : '#6B6485' }}>{photos.length}/50</span>
               </div>
               <div style={{ display: 'grid', gap: '10px' }}>
                 {photos.map((p, i) => (
@@ -319,7 +388,7 @@ export default function Create() {
         {/* PUBLISH */}
         <div style={{ display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row' }}>
           <button onClick={handlePublish} disabled={loading} style={{ background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500', padding: '14px 28px', borderRadius: '9px', border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Publishing...' : 'Publish drop'}
+            Publish drop
           </button>
           <button onClick={() => window.location.href = '/dashboard'} style={{ background: 'white', color: '#1C1830', fontSize: '15px', padding: '13px 24px', borderRadius: '9px', border: '1px solid rgba(83,74,183,0.25)', cursor: 'pointer' }}>
             Cancel

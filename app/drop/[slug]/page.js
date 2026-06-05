@@ -77,7 +77,6 @@ export default function DropViewer() {
   const getDaysLeft = () => Math.ceil((new Date(drop.expires_at) - new Date()) / (1000 * 60 * 60 * 24))
 
   const getGridCols = () => {
-    if (isMobile) return 'repeat(2, 1fr)'
     if (drop.layout === 'grid2') return 'repeat(2, 1fr)'
     return 'repeat(3, 1fr)'
   }
@@ -85,7 +84,7 @@ export default function DropViewer() {
   const v = VIBES[drop?.vibe] || VIBES.electric
   const spacing = SPACING[drop?.spacing] || SPACING.normal
   const isDark = ['electric','darkroom','earthy','ocean','film'].includes(drop?.vibe)
-  const pad = isMobile ? '16px' : '24px'
+  const pad = isMobile ? '12px' : '24px'
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -139,25 +138,25 @@ export default function DropViewer() {
 
       {/* LIGHTBOX */}
       {lightbox !== null && (
-        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? '16px' : '24px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: '95vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <img src={photos[lightbox].url} style={{ maxWidth: '100%', maxHeight: photos[lightbox].caption ? '78vh' : '85vh', objectFit: 'contain', borderRadius: '4px', display: 'block' }} />
+        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? '8px' : '24px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'relative', maxWidth: '98vw', maxHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <img src={photos[lightbox].url} style={{ maxWidth: '100%', maxHeight: photos[lightbox].caption ? '75vh' : '85vh', objectFit: 'contain', borderRadius: '4px', display: 'block' }} />
             {photos[lightbox].caption && (
-              <div style={{ marginTop: '12px', padding: '8px 16px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', maxWidth: '500px' }}>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4 }}>
+              <div style={{ marginTop: '10px', padding: '8px 16px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', textAlign: 'center', maxWidth: '500px' }}>
+                <div style={{ fontSize: isMobile ? '13px' : '14px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4 }}>
                   {photos[lightbox].caption}
                 </div>
               </div>
             )}
           </div>
-          <div onClick={() => setLightbox(null)} style={{ position: 'fixed', top: '16px', right: '16px', fontSize: '28px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', zIndex: 201 }}>×</div>
+          <div onClick={() => setLightbox(null)} style={{ position: 'fixed', top: '12px', right: '12px', fontSize: '28px', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', zIndex: 201 }}>×</div>
           {lightbox > 0 && (
-            <div onClick={(e) => { e.stopPropagation(); setLightbox(lightbox - 1) }} style={{ position: 'fixed', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: isMobile ? '36px' : '28px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: '8px' }}>‹</div>
+            <div onClick={(e) => { e.stopPropagation(); setLightbox(lightbox - 1) }} style={{ position: 'fixed', left: '4px', top: '50%', transform: 'translateY(-50%)', fontSize: isMobile ? '40px' : '28px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: '8px' }}>‹</div>
           )}
           {lightbox < photos.length - 1 && (
-            <div onClick={(e) => { e.stopPropagation(); setLightbox(lightbox + 1) }} style={{ position: 'fixed', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: isMobile ? '36px' : '28px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: '8px' }}>›</div>
+            <div onClick={(e) => { e.stopPropagation(); setLightbox(lightbox + 1) }} style={{ position: 'fixed', right: '4px', top: '50%', transform: 'translateY(-50%)', fontSize: isMobile ? '40px' : '28px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: '8px' }}>›</div>
           )}
-          <div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+          <div style={{ position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
             {lightbox + 1} / {photos.length}
           </div>
         </div>
@@ -174,19 +173,19 @@ export default function DropViewer() {
       </nav>
 
       {/* HEADER */}
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: `${isMobile ? '24px' : '40px'} ${pad} 20px` }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: `${isMobile ? '20px' : '40px'} ${pad} 16px` }}>
         <div style={{ fontSize: '11px', color: v.subtext, fontFamily: 'monospace', marginBottom: '8px', opacity: 0.6 }}>
           picdrop.live/drop/{slug}
         </div>
-        <div style={{ fontFamily: v.font, fontSize: isMobile ? '28px' : 'clamp(28px, 4vw, 46px)', color: v.text, lineHeight: 1.15, marginBottom: '10px' }}>
+        <div style={{ fontFamily: v.font, fontSize: isMobile ? '24px' : 'clamp(28px, 4vw, 46px)', color: v.text, lineHeight: 1.15, marginBottom: '8px' }}>
           {drop.title}
         </div>
         {drop.caption && (
-          <div style={{ fontSize: isMobile ? '14px' : '15px', color: v.subtext, marginBottom: '14px', lineHeight: 1.6 }}>
+          <div style={{ fontSize: isMobile ? '13px' : '15px', color: v.subtext, marginBottom: '12px', lineHeight: 1.6 }}>
             {drop.caption}
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
           <span style={{ fontSize: '12px', padding: '4px 12px', borderRadius: '99px', background: `${v.accent}22`, color: v.accent, border: `1px solid ${v.accent}44` }}>
             📷 {photos.length} photo{photos.length !== 1 ? 's' : ''}
           </span>
@@ -199,24 +198,31 @@ export default function DropViewer() {
       </div>
 
       {/* PHOTOS */}
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: spacing.gap === '0px' ? '0' : `0 ${isMobile ? '8px' : '24px'}` }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: spacing.gap === '0px' ? '0' : `0 ${isMobile ? '4px' : '24px'}` }}>
         {photos.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', color: v.subtext, fontSize: '14px', border: `1px dashed ${v.border}`, borderRadius: '14px', margin: `0 ${pad}` }}>
             No photos yet
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: getGridCols(), gap: isMobile && spacing.gap === '12px' ? '6px' : spacing.gap, borderRadius: spacing.borderRadius, overflow: 'hidden' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: getGridCols(),
+            gap: isMobile ? (spacing.gap === '12px' ? '3px' : spacing.gap === '4px' ? '2px' : '0px') : spacing.gap,
+            borderRadius: isMobile ? '8px' : spacing.borderRadius,
+            overflow: 'hidden'
+          }}>
             {photos.map((p, i) => (
               <div key={i} onClick={() => setLightbox(i)} style={{
                 aspectRatio: !isMobile && drop.layout === 'masonry' && i === 0 ? 'unset' : '1',
                 gridRow: !isMobile && drop.layout === 'masonry' && i === 0 ? 'span 2' : 'auto',
-                overflow: 'hidden', cursor: 'pointer',
-                borderRadius: spacing.gap === '12px' ? '8px' : '0px',
-                border: drop.spacing === 'airy' ? `3px solid ${v.bg}` : 'none',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                borderRadius: spacing.gap === '12px' ? (isMobile ? '4px' : '8px') : '0px',
+                border: drop.spacing === 'airy' ? `2px solid ${v.bg}` : 'none',
                 position: 'relative'
               }}>
                 <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                {p.caption && (
+                {p.caption && !isMobile && (
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', padding: '16px 8px 6px', pointerEvents: 'none' }}>
                     <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.caption}
