@@ -1,3 +1,4 @@
+'use client'
 export default function Navbar() {
   return (
     <nav style={{
@@ -12,7 +13,7 @@ export default function Navbar() {
       top: 0,
       zIndex: 100
     }}>
-      <div style={{
+      <div onClick={() => window.location.href = '/'} style={{
         fontFamily: 'Georgia, serif',
         fontSize: '21px',
         color: '#ffffff',
@@ -22,7 +23,7 @@ export default function Navbar() {
         Pic<span style={{ color: '#9B8FE4', fontStyle: 'italic' }}>drop</span>
       </div>
       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-        <div style={{
+        <div onClick={() => window.location.href = '/login'} style={{
           fontSize: '13px',
           color: 'rgba(255,255,255,0.6)',
           cursor: 'pointer',
@@ -31,7 +32,7 @@ export default function Navbar() {
         }}>
           Sign in
         </div>
-        <button style={{
+        <button onClick={() => window.location.href = '/create'} style={{
           background: '#6040C8',
           color: 'white',
           fontSize: '13px',
