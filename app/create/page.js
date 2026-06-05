@@ -28,11 +28,15 @@ export default function Create() {
     setPhotos(prev => prev.filter((_, i) => i !== index))
   }
 
-  const checkSlug = (val) => {
+ const checkSlug = async (val) => {
     setSlug(val)
-    const taken = ['test', 'photos', 'vacation', 'mytrip']
     if (!val) { setSlugStatus(''); return }
-    if (taken.includes(val.toLowerCase())) {
+    const { data } = await supabase
+      .from('drops')
+      .select('slug')
+      .eq('slug', val.toLowerCase())
+      .single()
+    if (data) {
       setSlugStatus('taken')
     } else {
       setSlugStatus('available')

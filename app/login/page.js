@@ -5,6 +5,7 @@ import { supabase } from '../supabase'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -12,6 +13,12 @@ export default function Login() {
   const handleAuth = async () => {
     setLoading(true)
     setMessage('')
+
+    if (isSignUp && password !== confirmPassword) {
+      setMessage('Passwords do not match')
+      setLoading(false)
+      return
+    }
 
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password })
@@ -23,6 +30,18 @@ export default function Login() {
       else window.location.href = '/dashboard'
     }
     setLoading(false)
+  }
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 13px',
+    border: '1px solid rgba(83,74,183,0.25)',
+    borderRadius: '9px',
+    fontSize: '14px',
+    marginBottom: '10px',
+    fontFamily: 'sans-serif',
+    outline: 'none',
+    boxSizing: 'border-box'
   }
 
   return (
@@ -63,43 +82,32 @@ export default function Login() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px 13px',
-            border: '1px solid rgba(83,74,183,0.25)',
-            borderRadius: '9px',
-            fontSize: '14px',
-            marginBottom: '10px',
-            fontFamily: 'sans-serif',
-            outline: 'none',
-            boxSizing: 'border-box'
-          }}
+          style={inputStyle}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px 13px',
-            border: '1px solid rgba(83,74,183,0.25)',
-            borderRadius: '9px',
-            fontSize: '14px',
-            marginBottom: '16px',
-            fontFamily: 'sans-serif',
-            outline: 'none',
-            boxSizing: 'border-box'
-          }}
+          style={inputStyle}
         />
+        {isSignUp && (
+          <input
+            type="password"
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={inputStyle}
+          />
+        )}
 
         {message && (
           <div style={{
             fontSize: '13px',
-            color: message.includes('error') || message.includes('Error') ? '#A32D2D' : '#0F6E56',
+            color: message.includes('match') || message.includes('error') ? '#A32D2D' : '#0F6E56',
             marginBottom: '14px',
             padding: '8px',
-            background: message.includes('error') || message.includes('Error') ? '#FDEAEA' : '#E1F5EE',
+            background: message.includes('match') || message.includes('error') ? '#FDEAEA' : '#E1F5EE',
             borderRadius: '8px'
           }}>
             {message}
@@ -127,7 +135,7 @@ export default function Login() {
         </button>
 
         <div
-          onClick={() => setIsSignUp(!isSignUp)}
+          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setConfirmPassword('') }}
           style={{
             fontSize: '13px',
             color: '#6040C8',
