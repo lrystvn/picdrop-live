@@ -25,6 +25,7 @@ export default function DropViewer() {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [pwError, setPwError] = useState('')
   const [lightbox, setLightbox] = useState(null)
@@ -121,10 +122,24 @@ export default function DropViewer() {
         <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔒</div>
         <div style={{ fontFamily: v.font, fontSize: '20px', marginBottom: '6px', color: v.text }}>This drop is private</div>
         <div style={{ fontSize: '14px', color: v.subtext, marginBottom: '22px' }}>Enter the password to view the photos.</div>
-        <input type="password" placeholder="Enter password" value={password}
-          onChange={e => setPassword(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && checkPassword()}
-          style={{ width: '100%', padding: '10px 13px', border: `1px solid ${v.border}`, borderRadius: '9px', fontSize: '16px', textAlign: 'center', fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', marginBottom: '6px', background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', color: v.text }} />
+
+        <div style={{ position: 'relative', marginBottom: '6px' }}>
+          <input
+            type={showPw ? 'text' : 'password'}
+            placeholder="Enter password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && checkPassword()}
+            style={{ width: '100%', padding: '12px 44px 12px 13px', border: `1px solid ${v.border}`, borderRadius: '9px', fontSize: '16px', textAlign: 'center', fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', color: v.text }}
+          />
+          <div
+            onClick={() => setShowPw(!showPw)}
+            style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '18px', userSelect: 'none', opacity: 0.6 }}
+          >
+            {showPw ? '🙈' : '👁️'}
+          </div>
+        </div>
+
         {pwError && <div style={{ fontSize: '12px', color: '#E24B4A', marginBottom: '10px' }}>{pwError}</div>}
         <button onClick={checkPassword} style={{ width: '100%', background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '14px', fontWeight: '500', padding: '14px', borderRadius: '9px', border: 'none', cursor: 'pointer', marginTop: '6px' }}>
           View photos
