@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../supabase'
 
@@ -38,6 +38,10 @@ export default function EditDrop() {
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [isMobile, setIsMobile] = useState(false)
+  const [dragIndex, setDragIndex] = useState(null)
+  const [dragOverIndex, setDragOverIndex] = useState(null)
+  const dragItem = useRef(null)
+  const dragOverItem = useRef(null)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 600)
@@ -82,7 +86,9 @@ export default function EditDrop() {
   }, [slug])
 
   const loadPhotos = async (dropId) => {
-    const { data } = await supabase.from('photos').select('*').eq('drop_id', dropId)
+    const { data } = await supabase
+      .from('photos').select('*').eq('drop_id', dropId)
+      .order('order_index', { ascending: true })
     if (data) {
       const withUrls = data.map(p => {
         const { data: urlData } = supabase.storage.from('photos').getPublicUrl(p.file_path)
@@ -99,15 +105,16 @@ export default function EditDrop() {
 
     const BATCH_SIZE = 5
     const photoRecords = []
+    const startIndex = photos.length
 
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE)
       const results = await Promise.all(
-        batch.map(async (file) => {
+        batch.map(async (file, batchIdx) => {
           const fileExt = file.name.split('.').pop()
           const fileName = `${drop.id}/${Date.now()}-${Math.random().toString(36).substr(2,6)}.${fileExt}`
           const { error } = await supabase.storage.from('photos').upload(fileName, file)
-          if (!error) return { drop_id: drop.id, file_path: fileName, caption: '' }
+          if (!error) return { drop_id: drop.id, file_path: fileName, caption: '', order_index: startIndex + i + batchIdx }
           return null
         })
       )
@@ -126,6 +133,41 @@ export default function EditDrop() {
     await supabase.storage.from('photos').remove([photo.file_path])
     await supabase.from('photos').delete().eq('id', photo.id)
     setPhotos(prev => prev.filter(p => p.id !== photo.id))
+  }
+
+  // Drag handlers
+  const handleDragStart = (index) => {
+    dragItem.current = index
+    setDragIndex(index)
+  }
+
+  const handleDragEnter = (index) => {
+    dragOverItem.current = index
+    setDragOverIndex(index)
+  }
+
+  const handleDragEnd = async () => {
+    if (dragItem.current === null || dragOverItem.current === null) return
+    if (dragItem.current === dragOverItem.current) {
+      setDragIndex(null); setDragOverIndex(null); return
+    }
+    const newPhotos = [...photos]
+    const dragged = newPhotos.splice(dragItem.current, 1)[0]
+    newPhotos.splice(dragOverItem.current, 0, dragged)
+    setPhotos(newPhotos)
+    dragItem.current = null
+    dragOverItem.current = null
+    setDragIndex(null)
+    setDragOverIndex(null)
+
+    // Save new order to database
+    await Promise.all(
+      newPhotos.map((p, i) =>
+        supabase.from('photos').update({ order_index: i }).eq('id', p.id)
+      )
+    )
+    setMessage('Order saved!')
+    setTimeout(() => setMessage(''), 1500)
   }
 
   const getDaysLeft = () => {
@@ -233,20 +275,77 @@ export default function EditDrop() {
 
         {/* PHOTOS */}
         <div style={cardStyle}>
-          <div style={secLabel}>Photos ({photos.length})</div>
-          <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.18)', borderRadius: '12px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '14px', background: '#FAFAFA' }}>
+          <div style={{ ...secLabel, marginBottom: '6px' }}>Photos ({photos.length})</div>
+          <div style={{ fontSize: '12px', color: '#9B9BA8', marginBottom: '14px' }}>
+            Drag to reorder · first photo is the cover
+          </div>
+
+          <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.18)', borderRadius: '12px', padding: '18px', textAlign: 'center', cursor: 'pointer', marginBottom: '14px', background: '#FAFAFA' }}>
             <input type="file" accept="image/*" multiple onChange={handleAddPhotos} style={{ display: 'none' }} />
-            <div style={{ fontSize: '22px', marginBottom: '6px' }}>📷</div>
+            <div style={{ fontSize: '20px', marginBottom: '4px' }}>📷</div>
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#1C1830' }}>
               {uploading ? 'Uploading...' : 'Tap to add more photos'}
             </div>
           </label>
+
           {photos.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(88px, 1fr))', gap: '6px' }}>
+            <div style={{ display: 'grid', gap: '8px' }}>
               {photos.map((p, i) => (
-                <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '9px', overflow: 'hidden' }}>
-                  <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div onClick={() => handleDeletePhoto(p)} style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', background: 'rgba(220,38,38,0.8)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', color: 'white' }}>×</div>
+                <div
+                  key={p.id}
+                  draggable
+                  onDragStart={() => handleDragStart(i)}
+                  onDragEnter={() => handleDragEnter(i)}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={e => e.preventDefault()}
+                  style={{
+                    display: 'flex', gap: '12px', alignItems: 'center',
+                    padding: '8px', borderRadius: '10px',
+                    background: dragOverIndex === i && dragIndex !== i ? 'rgba(96,64,200,0.08)' : 'transparent',
+                    border: dragOverIndex === i && dragIndex !== i ? '1px solid rgba(96,64,200,0.25)' : '1px solid transparent',
+                    opacity: dragIndex === i ? 0.4 : 1,
+                    transition: 'all .15s',
+                    cursor: 'grab'
+                  }}
+                >
+                  {/* DRAG HANDLE */}
+                  <div style={{ flexShrink: 0, cursor: 'grab' }}>
+                    <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+                      <circle cx="4" cy="4" r="1.5" fill="#D3D1C7"/>
+                      <circle cx="4" cy="10" r="1.5" fill="#D3D1C7"/>
+                      <circle cx="4" cy="16" r="1.5" fill="#D3D1C7"/>
+                      <circle cx="10" cy="4" r="1.5" fill="#D3D1C7"/>
+                      <circle cx="10" cy="10" r="1.5" fill="#D3D1C7"/>
+                      <circle cx="10" cy="16" r="1.5" fill="#D3D1C7"/>
+                    </svg>
+                  </div>
+
+                  {/* PHOTO */}
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden' }}>
+                      <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    {i === 0 && (
+                      <div style={{ position: 'absolute', bottom: '3px', left: '3px', fontSize: '9px', fontWeight: '600', background: 'rgba(96,64,200,0.9)', color: 'white', padding: '2px 5px', borderRadius: '4px', letterSpacing: '0.04em' }}>
+                        COVER
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FILE INFO */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '12px', color: '#9B9BA8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.file_path.split('/').pop()}
+                    </div>
+                    {i === 0 && (
+                      <div style={{ fontSize: '11px', color: '#6040C8', marginTop: '2px' }}>Cover photo</div>
+                    )}
+                  </div>
+
+                  {/* DELETE */}
+                  <div onClick={() => handleDeletePhoto(p)} style={{ width: '28px', height: '28px', background: '#FEF2F2', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, fontSize: '14px', color: '#DC2626' }}>
+                    ×
+                  </div>
                 </div>
               ))}
             </div>
@@ -263,8 +362,7 @@ export default function EditDrop() {
               <div key={v.id} onClick={() => setVibe(v.id)} style={{
                 border: `1.5px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.12)'}`,
                 borderRadius: '12px', padding: '12px', cursor: 'pointer',
-                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA',
-                transition: 'all .15s'
+                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA', transition: 'all .15s'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '14px' }}>{v.emoji}</span>
@@ -283,11 +381,9 @@ export default function EditDrop() {
               { id: 'airy', label: 'Airy', desc: 'Spaced out' }
             ].map(s => (
               <div key={s.id} onClick={() => setSpacing(s.id)} style={{
-                flex: 1,
-                border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
+                flex: 1, border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
                 background: spacing === s.id ? '#EDE9F9' : '#FAFAFA',
-                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer',
-                transition: 'all .15s'
+                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
               }}>
                 <div style={{ fontSize: '13px', fontWeight: '500', color: spacing === s.id ? '#6040C8' : '#1C1830', marginBottom: '2px' }}>{s.label}</div>
                 <div style={{ fontSize: '11px', color: '#9B9BA8' }}>{s.desc}</div>
@@ -301,12 +397,7 @@ export default function EditDrop() {
           <div style={secLabel}>Expiry</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ fontSize: '14px', color: '#1C1830' }}>Time remaining</div>
-            <div style={{
-              fontSize: '13px', fontWeight: '500',
-              color: urgent ? '#DC2626' : '#0F6E56',
-              background: urgent ? '#FEF2F2' : '#E1F5EE',
-              padding: '4px 12px', borderRadius: '99px'
-            }}>
+            <div style={{ fontSize: '13px', fontWeight: '500', color: urgent ? '#DC2626' : '#0F6E56', background: urgent ? '#FEF2F2' : '#E1F5EE', padding: '4px 12px', borderRadius: '99px' }}>
               {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
             </div>
           </div>
@@ -316,10 +407,9 @@ export default function EditDrop() {
               <div key={d} onClick={() => setExtendDays(d)} style={{
                 border: `1px solid ${extendDays === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
                 background: extendDays === d ? '#EDE9F9' : '#FAFAFA',
-                borderRadius: '10px', padding: '12px', textAlign: 'center', cursor: 'pointer',
-                transition: 'all .15s'
+                borderRadius: '10px', padding: '12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
               }}>
-                <div style={{ fontSize: '15px', fontFamily: 'Georgia, serif', color: '#6040C8', letterSpacing: '-0.01em' }}>{d === 0 ? '—' : `+${d}`}</div>
+                <div style={{ fontSize: '15px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d === 0 ? '—' : `+${d}`}</div>
                 <div style={{ fontSize: '10px', color: '#9B9BA8', marginTop: '3px' }}>{d === 0 ? 'no change' : 'days'}</div>
               </div>
             ))}

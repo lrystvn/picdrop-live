@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../supabase'
 
 const PicdropLogo = ({ onClick }) => (
@@ -36,6 +36,10 @@ export default function Create() {
   const [spacing, setSpacing] = useState('normal')
   const [showExpiry, setShowExpiry] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [dragIndex, setDragIndex] = useState(null)
+  const [dragOverIndex, setDragOverIndex] = useState(null)
+  const dragItem = useRef(null)
+  const dragOverItem = useRef(null)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 600)
@@ -70,6 +74,34 @@ export default function Create() {
 
   const updatePhotoCaption = (index, value) => {
     setPhotos(prev => prev.map((p, i) => i === index ? { ...p, caption: value } : p))
+  }
+
+  // Drag and drop handlers
+  const handleDragStart = (index) => {
+    dragItem.current = index
+    setDragIndex(index)
+  }
+
+  const handleDragEnter = (index) => {
+    dragOverItem.current = index
+    setDragOverIndex(index)
+  }
+
+  const handleDragEnd = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return
+    if (dragItem.current === dragOverItem.current) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    const newPhotos = [...photos]
+    const dragged = newPhotos.splice(dragItem.current, 1)[0]
+    newPhotos.splice(dragOverItem.current, 0, dragged)
+    setPhotos(newPhotos)
+    dragItem.current = null
+    dragOverItem.current = null
+    setDragIndex(null)
+    setDragOverIndex(null)
   }
 
   const checkSlug = async (val) => {
@@ -124,14 +156,15 @@ export default function Create() {
       for (let i = 0; i < photos.length; i += BATCH_SIZE) {
         const batch = photos.slice(i, i + BATCH_SIZE)
         const batchResults = await Promise.all(
-          batch.map(async (photo) => {
+          batch.map(async (photo, batchIdx) => {
+            const globalIndex = i + batchIdx
             const fileExt = photo.name.split('.').pop()
             const fileName = `${drop.id}/${Date.now()}-${Math.random().toString(36).substr(2,6)}.${fileExt}`
             const { error: uploadError } = await supabase.storage.from('photos').upload(fileName, photo.file)
             if (uploadError) throw new Error('Upload error: ' + uploadError.message)
             completed++
             setUploadProgress({ current: completed, total: photos.length })
-            return { drop_id: drop.id, file_path: fileName, caption: photo.caption || '' }
+            return { drop_id: drop.id, file_path: fileName, caption: photo.caption || '', order_index: globalIndex }
           })
         )
         photoRecords.push(...batchResults)
@@ -152,25 +185,17 @@ export default function Create() {
   const pad = isMobile ? '16px' : '24px'
 
   const cardStyle = {
-    background: '#fff',
-    border: '1px solid rgba(83,74,183,0.1)',
-    borderRadius: '16px',
-    padding: isMobile ? '18px' : '24px',
-    marginBottom: '12px'
+    background: '#fff', border: '1px solid rgba(83,74,183,0.1)',
+    borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px'
   }
-
   const secLabel = {
     fontSize: '11px', fontWeight: '600', color: '#6040C8',
     letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px'
   }
-
   const inputStyle = {
-    width: '100%', padding: '11px 13px',
-    border: '1px solid rgba(83,74,183,0.18)',
-    borderRadius: '9px', fontSize: '15px',
-    fontFamily: 'sans-serif', outline: 'none',
-    boxSizing: 'border-box', color: '#1C1830',
-    background: '#FAFAFA'
+    width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)',
+    borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none',
+    boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA'
   }
 
   const Toggle = ({ value, onChange }) => (
@@ -179,7 +204,6 @@ export default function Create() {
     </div>
   )
 
-  // Publishing overlay
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <div style={{ textAlign: 'center', maxWidth: '320px', width: '100%' }}>
@@ -204,17 +228,13 @@ export default function Create() {
             </div>
           </>
         )}
-        <div style={{ marginTop: '36px', fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>
-          Don't close this page
-        </div>
+        <div style={{ marginTop: '36px', fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>Don't close this page</div>
       </div>
     </div>
   )
 
   return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
-
-      {/* NAV */}
       <nav style={{
         background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)',
         padding: `0 ${pad}`, height: '60px',
@@ -223,14 +243,12 @@ export default function Create() {
         position: 'sticky', top: 0, zIndex: 100
       }}>
         <PicdropLogo onClick={() => window.location.href = '/'} />
-        <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
           ← {isMobile ? 'Back' : 'Dashboard'}
         </div>
       </nav>
 
       <div style={{ maxWidth: '660px', margin: '0 auto', padding: `${isMobile ? '24px' : '40px'} ${pad}` }}>
-
-        {/* PAGE HEADER */}
         <div style={{ marginBottom: '28px' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>
             New photo drop
@@ -246,8 +264,7 @@ export default function Create() {
           <label style={{
             display: 'block', border: '2px dashed rgba(83,74,183,0.2)',
             borderRadius: '12px', padding: isMobile ? '28px 16px' : '36px 20px',
-            textAlign: 'center', cursor: 'pointer', background: '#FAFAFA',
-            transition: 'border-color .15s'
+            textAlign: 'center', cursor: 'pointer', background: '#FAFAFA'
           }}>
             <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: 'none' }} />
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>📷</div>
@@ -267,19 +284,57 @@ export default function Create() {
 
           {!loadingPhotos && photos.length > 0 && (
             <div style={{ marginTop: '16px' }}>
-              <div style={{ fontSize: '12px', color: '#9B9BA8', marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{photos.length} photo{photos.length !== 1 ? 's' : ''} added</span>
+              <div style={{ fontSize: '12px', color: '#9B9BA8', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{photos.length} photo{photos.length !== 1 ? 's' : ''} · <span style={{ color: '#6040C8' }}>drag to reorder</span></span>
                 <span style={{ color: photos.length >= 45 ? '#DC2626' : '#9B9BA8', fontWeight: photos.length >= 45 ? '500' : '400' }}>{photos.length}/50</span>
               </div>
-              <div style={{ display: 'grid', gap: '10px' }}>
+              <div style={{ display: 'grid', gap: '8px' }}>
                 {photos.map((p, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                    <div style={{ position: 'relative', width: isMobile ? '68px' : '76px', height: isMobile ? '68px' : '76px', borderRadius: '9px', overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <div onClick={() => removePhoto(i)} style={{ position: 'absolute', top: '4px', right: '4px', width: '20px', height: '20px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '11px', color: 'white' }}>×</div>
+                  <div
+                    key={i}
+                    draggable
+                    onDragStart={() => handleDragStart(i)}
+                    onDragEnter={() => handleDragEnter(i)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={e => e.preventDefault()}
+                    style={{
+                      display: 'flex', gap: '12px', alignItems: 'flex-start',
+                      padding: '8px', borderRadius: '10px',
+                      background: dragOverIndex === i && dragIndex !== i ? 'rgba(96,64,200,0.08)' : 'transparent',
+                      border: dragOverIndex === i && dragIndex !== i ? '1px solid rgba(96,64,200,0.25)' : '1px solid transparent',
+                      opacity: dragIndex === i ? 0.4 : 1,
+                      transition: 'all .15s',
+                      cursor: 'grab'
+                    }}
+                  >
+                    {/* DRAG HANDLE */}
+                    <div style={{ display: 'flex', alignItems: 'center', paddingTop: '4px', flexShrink: 0, cursor: 'grab' }}>
+                      <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+                        <circle cx="4" cy="4" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="4" cy="10" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="4" cy="16" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="10" cy="4" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="10" cy="10" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="10" cy="16" r="1.5" fill="#D3D1C7"/>
+                      </svg>
                     </div>
+
+                    {/* PHOTO + INDEX */}
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                      <div style={{ width: isMobile ? '64px' : '72px', height: isMobile ? '64px' : '72px', borderRadius: '9px', overflow: 'hidden' }}>
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      {i === 0 && (
+                        <div style={{ position: 'absolute', bottom: '3px', left: '3px', fontSize: '9px', fontWeight: '600', background: 'rgba(96,64,200,0.9)', color: 'white', padding: '2px 5px', borderRadius: '4px', letterSpacing: '0.04em' }}>
+                          COVER
+                        </div>
+                      )}
+                      <div onClick={() => removePhoto(i)} style={{ position: 'absolute', top: '3px', right: '3px', width: '18px', height: '18px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px', color: 'white' }}>×</div>
+                    </div>
+
+                    {/* CAPTION */}
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '12px', color: '#9B9BA8', marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: '11px', color: '#9B9BA8', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {p.name}
                       </div>
                       <input
@@ -287,11 +342,15 @@ export default function Create() {
                         placeholder="Add a caption (optional)"
                         value={p.caption}
                         onChange={e => updatePhotoCaption(i, e.target.value)}
+                        onMouseDown={e => e.stopPropagation()}
                         style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '7px', fontSize: '13px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
                       />
                     </div>
                   </div>
                 ))}
+              </div>
+              <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '10px', textAlign: 'center' }}>
+                First photo becomes the cover image
               </div>
             </div>
           )}
@@ -332,7 +391,7 @@ export default function Create() {
               </div>
             )}
             {slugStatus && (
-              <div style={{ fontSize: '12px', marginTop: '6px', color: slugStatus === 'available' ? '#0F6E56' : '#DC2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ fontSize: '12px', marginTop: '6px', color: slugStatus === 'available' ? '#0F6E56' : '#DC2626' }}>
                 {slugStatus === 'available' ? '✓ Available' : '✗ Already taken'}
               </div>
             )}
@@ -344,10 +403,9 @@ export default function Create() {
                 <div key={d} onClick={() => setExpiry(d)} style={{
                   border: `1px solid ${expiry === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
                   background: expiry === d ? '#EDE9F9' : '#FAFAFA',
-                  borderRadius: '10px', padding: '14px 12px', textAlign: 'center', cursor: 'pointer',
-                  transition: 'all .15s'
+                  borderRadius: '10px', padding: '14px 12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
                 }}>
-                  <div style={{ fontSize: '20px', fontFamily: 'Georgia, serif', color: '#6040C8', letterSpacing: '-0.01em' }}>{d}</div>
+                  <div style={{ fontSize: '20px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d}</div>
                   <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '2px' }}>days</div>
                 </div>
               ))}
@@ -361,7 +419,6 @@ export default function Create() {
           <div style={{ fontSize: '13px', color: '#6B6485', marginBottom: '16px', lineHeight: 1.5 }}>
             Sets the whole look and feel of your drop page.
           </div>
-
           <div style={{ background: selectedVibe.bg, borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(0,0,0,0.08)' }}>
             <div style={{ fontFamily: selectedVibe.font, fontSize: '15px', color: selectedVibe.accent, marginBottom: '10px', opacity: 0.9 }}>
               Preview — {selectedVibe.name}
@@ -372,14 +429,12 @@ export default function Create() {
               ))}
             </div>
           </div>
-
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
             {vibes.map(v => (
               <div key={v.id} onClick={() => setVibe(v.id)} style={{
                 border: `1.5px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.12)'}`,
                 borderRadius: '12px', padding: '12px', cursor: 'pointer',
-                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA',
-                transition: 'all .15s'
+                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA', transition: 'all .15s'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
                   <span style={{ fontSize: '16px' }}>{v.emoji}</span>
@@ -389,7 +444,6 @@ export default function Create() {
               </div>
             ))}
           </div>
-
           <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '10px', color: '#1C1830' }}>Photo spacing</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             {[
@@ -398,11 +452,9 @@ export default function Create() {
               { id: 'airy', label: 'Airy', desc: 'Spaced out' }
             ].map(s => (
               <div key={s.id} onClick={() => setSpacing(s.id)} style={{
-                flex: 1,
-                border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
+                flex: 1, border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
                 background: spacing === s.id ? '#EDE9F9' : '#FAFAFA',
-                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer',
-                transition: 'all .15s'
+                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
               }}>
                 <div style={{ fontSize: '13px', fontWeight: '500', color: spacing === s.id ? '#6040C8' : '#1C1830', marginBottom: '2px' }}>{s.label}</div>
                 <div style={{ fontSize: '11px', color: '#9B9BA8' }}>{s.desc}</div>
@@ -414,31 +466,15 @@ export default function Create() {
         {/* OPTIONS */}
         <div style={cardStyle}>
           <div style={secLabel}>Options</div>
-
           {[
-            {
-              label: 'Password protection',
-              desc: 'Require a password before viewing',
-              value: hasPassword,
-              onChange: setHasPassword
-            },
-            {
-              label: 'Show expiry countdown',
-              desc: 'Viewers see how long the link has left',
-              value: showExpiry,
-              onChange: setShowExpiry
-            },
-            {
-              label: 'Allow download',
-              desc: 'Viewers can save photos to their device',
-              value: allowDownload,
-              onChange: setAllowDownload
-            }
+            { label: 'Password protection', desc: 'Require a password before viewing', value: hasPassword, onChange: setHasPassword },
+            { label: 'Show expiry countdown', desc: 'Viewers see how long the link has left', value: showExpiry, onChange: setShowExpiry },
+            { label: 'Allow download', desc: 'Viewers can save photos to their device', value: allowDownload, onChange: setAllowDownload }
           ].map((opt, i, arr) => (
             <div key={opt.label}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(83,74,183,0.08)' : 'none' }}>
                 <div>
-                  <div style={{ fontSize: '14px', color: '#1C1830', fontWeight: '400' }}>{opt.label}</div>
+                  <div style={{ fontSize: '14px', color: '#1C1830' }}>{opt.label}</div>
                   <div style={{ fontSize: '12px', color: '#9B9BA8', marginTop: '2px' }}>{opt.desc}</div>
                 </div>
                 <Toggle value={opt.value} onChange={opt.onChange} />
