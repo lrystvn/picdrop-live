@@ -111,8 +111,11 @@ export default function Dashboard() {
                       {drop.title}
                     </div>
                     <div style={{ fontSize: '12px', color: '#6B6485' }}>
-                      picdrop.live/drop/{drop.slug} · {expired ? 'Expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
-                    </div>
+  <a href={`https://picdrop.live/drop/${drop.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: '#6040C8', textDecoration: 'none' }}>
+    picdrop.live/drop/{drop.slug}
+  </a>
+  {' '}· {expired ? 'Expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
+</div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                     {!expired && (
