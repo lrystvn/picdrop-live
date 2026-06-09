@@ -4,6 +4,22 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../supabase'
 
+const PicdropLogo = ({ onClick }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={onClick}>
+    <div style={{ width: 22, height: 22, background: '#6040C8', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.3"/>
+      </svg>
+    </div>
+    <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: '22px', fontWeight: '600', color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+      pic<span style={{ color: '#9B8FE4' }}>drop</span>
+    </span>
+  </div>
+)
+
 export default function EditDrop() {
   const { slug } = useParams()
   const [drop, setDrop] = useState(null)
@@ -45,11 +61,8 @@ export default function EditDrop() {
       if (!user) { window.location.href = '/login'; return }
 
       const { data: dropData } = await supabase
-        .from('drops')
-        .select('*')
-        .eq('slug', slug)
-        .eq('user_id', user.id)
-        .single()
+        .from('drops').select('*')
+        .eq('slug', slug).eq('user_id', user.id).single()
 
       if (!dropData) { window.location.href = '/dashboard'; return }
 
@@ -101,14 +114,11 @@ export default function EditDrop() {
       photoRecords.push(...results.filter(Boolean))
     }
 
-    if (photoRecords.length > 0) {
-      await supabase.from('photos').insert(photoRecords)
-    }
-
+    if (photoRecords.length > 0) await supabase.from('photos').insert(photoRecords)
     await loadPhotos(drop.id)
     setUploading(false)
     setMessage(`${photoRecords.length} photo${photoRecords.length !== 1 ? 's' : ''} added!`)
-    setTimeout(() => setMessage(''), 2000)
+    setTimeout(() => setMessage(''), 2500)
   }
 
   const handleDeletePhoto = async (photo) => {
@@ -125,34 +135,28 @@ export default function EditDrop() {
 
   const handleSave = async () => {
     setSaving(true)
-
     const updates = {
-      title,
-      caption,
-      vibe,
-      spacing,
+      title, caption, vibe, spacing,
       password: hasPassword ? password : null,
       show_expiry: showExpiry,
       allow_download: allowDownload
     }
-
     if (extendDays > 0) {
       const newExpiry = new Date(drop.expires_at)
       newExpiry.setDate(newExpiry.getDate() + extendDays)
       updates.expires_at = newExpiry.toISOString()
     }
-
     await supabase.from('drops').update(updates).eq('id', drop.id)
     setSaving(false)
     setMessage('All changes saved!')
-    setTimeout(() => setMessage(''), 2000)
+    setTimeout(() => setMessage(''), 2500)
     if (extendDays > 0) setExtendDays(0)
   }
 
   const pad = isMobile ? '16px' : '24px'
-  const cardStyle = { background: '#fff', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '14px', padding: isMobile ? '16px' : '22px', marginBottom: '12px' }
-  const secLabel = { fontSize: '11px', fontWeight: '500', color: '#6040C8', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: '16px' }
-  const inputStyle = { width: '100%', padding: '10px 13px', border: '1px solid rgba(83,74,183,0.25)', borderRadius: '9px', fontSize: '14px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box' }
+  const cardStyle = { background: '#fff', border: '1px solid rgba(83,74,183,0.1)', borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px' }
+  const secLabel = { fontSize: '11px', fontWeight: '600', color: '#6040C8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }
+  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
 
   const Toggle = ({ value, onChange }) => (
     <div onClick={() => onChange(!value)} style={{ width: '42px', height: '24px', borderRadius: '99px', cursor: 'pointer', background: value ? '#6040C8' : '#D3D1C7', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
@@ -162,32 +166,51 @@ export default function EditDrop() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#6B6485', fontSize: '14px' }}>Loading...</div>
+      <div style={{ color: '#9B9BA8', fontSize: '14px' }}>Loading...</div>
     </div>
   )
 
+  const daysLeft = getDaysLeft()
+  const urgent = daysLeft <= 3
+
   return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
-      <nav style={{ background: '#1C1830', padding: `0 ${pad}`, height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <div onClick={() => window.location.href = '/'} style={{ fontFamily: 'Georgia, serif', fontSize: '21px', color: '#ffffff', cursor: 'pointer' }}>
-          Pic<span style={{ color: '#9B8FE4', fontStyle: 'italic' }}>drop</span>
-        </div>
-        <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
+
+      {/* NAV */}
+      <nav style={{
+        background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)',
+        padding: `0 ${pad}`, height: '60px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        position: 'sticky', top: 0, zIndex: 100
+      }}>
+        <PicdropLogo onClick={() => window.location.href = '/'} />
+        <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
           ← Dashboard
         </div>
       </nav>
 
-      <div style={{ maxWidth: '660px', margin: '0 auto', padding: `${isMobile ? '20px' : '36px'} ${pad}` }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '24px' : '28px', marginBottom: '5px', color: '#1C1830' }}>Edit drop</div>
-        <div style={{ fontSize: '14px', color: '#6B6485', marginBottom: '20px' }}>
-          <a href={`https://picdrop.live/drop/${slug}`} target="_blank" rel="noopener noreferrer" style={{ color: '#6040C8', textDecoration: 'none' }}>
-            picdrop.live/drop/{slug}
-          </a>
-          {' '}· {getDaysLeft()} days left
+      <div style={{ maxWidth: '660px', margin: '0 auto', padding: `${isMobile ? '24px' : '40px'} ${pad}` }}>
+
+        {/* PAGE HEADER */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>
+            Edit drop
+          </div>
+          <div style={{ fontSize: '14px', color: '#6B6485', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <a href={`https://picdrop.live/drop/${slug}`} target="_blank" rel="noopener noreferrer" style={{ color: '#6040C8', textDecoration: 'none' }}>
+              picdrop.live/drop/{slug}
+            </a>
+            <span style={{ color: '#D3D1C7' }}>·</span>
+            <span style={{ color: urgent ? '#DC2626' : '#6B6485', fontWeight: urgent ? '500' : '400' }}>
+              {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+            </span>
+          </div>
         </div>
 
+        {/* MESSAGE */}
         {message && (
-          <div style={{ background: '#E1F5EE', color: '#0F6E56', padding: '10px 14px', borderRadius: '9px', fontSize: '13px', marginBottom: '16px' }}>
+          <div style={{ background: '#E1F5EE', color: '#0F6E56', padding: '11px 14px', borderRadius: '10px', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             ✓ {message}
           </div>
         )}
@@ -196,65 +219,78 @@ export default function EditDrop() {
         <div style={cardStyle}>
           <div style={secLabel}>Details</div>
           <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: '#1C1830' }}>Title</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '7px', color: '#1C1830' }}>Title</label>
             <input type="text" value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px', color: '#1C1830' }}>Caption</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '7px', color: '#1C1830' }}>
+              Caption <span style={{ color: '#9B9BA8', fontWeight: '400' }}>(optional)</span>
+            </label>
             <textarea value={caption} onChange={e => setCaption(e.target.value)}
-              style={{ ...inputStyle, resize: 'vertical', minHeight: '74px' }} />
+              style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
           </div>
         </div>
 
         {/* PHOTOS */}
         <div style={cardStyle}>
           <div style={secLabel}>Photos ({photos.length})</div>
-          <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.25)', borderRadius: '9px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '14px' }}>
+          <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.18)', borderRadius: '12px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '14px', background: '#FAFAFA' }}>
             <input type="file" accept="image/*" multiple onChange={handleAddPhotos} style={{ display: 'none' }} />
-            <div style={{ fontSize: '20px', marginBottom: '4px' }}>📷</div>
-            <div style={{ fontSize: '13px', fontWeight: '500', color: '#1C1830' }}>
+            <div style={{ fontSize: '22px', marginBottom: '6px' }}>📷</div>
+            <div style={{ fontSize: '14px', fontWeight: '500', color: '#1C1830' }}>
               {uploading ? 'Uploading...' : 'Tap to add more photos'}
             </div>
           </label>
           {photos.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '6px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(88px, 1fr))', gap: '6px' }}>
               {photos.map((p, i) => (
-                <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '7px', overflow: 'hidden' }}>
+                <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '9px', overflow: 'hidden' }}>
                   <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div onClick={() => handleDeletePhoto(p)} style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', background: 'rgba(163,45,45,0.85)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', color: 'white' }}>×</div>
+                  <div onClick={() => handleDeletePhoto(p)} style={{ position: 'absolute', top: '4px', right: '4px', width: '22px', height: '22px', background: 'rgba(220,38,38,0.8)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '12px', color: 'white' }}>×</div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', color: '#6B6485', fontSize: '13px', padding: '20px' }}>No photos yet</div>
+            <div style={{ textAlign: 'center', color: '#9B9BA8', fontSize: '13px', padding: '20px' }}>No photos yet</div>
           )}
         </div>
 
         {/* VIBE */}
         <div style={cardStyle}>
           <div style={secLabel}>Vibe</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '18px' }}>
             {vibes.map(v => (
-              <div key={v.id} onClick={() => setVibe(v.id)} style={{ border: `2px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.15)'}`, borderRadius: '10px', padding: '10px', cursor: 'pointer', background: vibe === v.id ? '#EDE9F9' : 'white', transition: 'all .15s' }}>
+              <div key={v.id} onClick={() => setVibe(v.id)} style={{
+                border: `1.5px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.12)'}`,
+                borderRadius: '12px', padding: '12px', cursor: 'pointer',
+                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA',
+                transition: 'all .15s'
+              }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <span style={{ fontSize: '14px' }}>{v.emoji}</span>
                   <span style={{ fontSize: '11px', fontWeight: '500', color: '#1C1830' }}>{v.name}</span>
                 </div>
-                <div style={{ height: '12px', borderRadius: '3px', background: v.bg, border: '1px solid rgba(0,0,0,0.1)' }} />
+                <div style={{ height: '12px', borderRadius: '3px', background: v.bg, border: '1px solid rgba(0,0,0,0.08)' }} />
               </div>
             ))}
           </div>
 
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '8px', color: '#1C1830' }}>Photo spacing</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '10px', color: '#1C1830' }}>Photo spacing</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             {[
               { id: 'tight', label: 'Tight', desc: 'No gaps' },
               { id: 'normal', label: 'Normal', desc: 'Small gaps' },
-              { id: 'airy', label: 'Airy', desc: 'Lots of space' }
+              { id: 'airy', label: 'Airy', desc: 'Spaced out' }
             ].map(s => (
-              <div key={s.id} onClick={() => setSpacing(s.id)} style={{ flex: 1, border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.25)'}`, background: spacing === s.id ? '#EDE9F9' : 'white', borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer' }}>
+              <div key={s.id} onClick={() => setSpacing(s.id)} style={{
+                flex: 1,
+                border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
+                background: spacing === s.id ? '#EDE9F9' : '#FAFAFA',
+                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer',
+                transition: 'all .15s'
+              }}>
                 <div style={{ fontSize: '13px', fontWeight: '500', color: spacing === s.id ? '#6040C8' : '#1C1830', marginBottom: '2px' }}>{s.label}</div>
-                <div style={{ fontSize: '11px', color: '#6B6485' }}>{s.desc}</div>
+                <div style={{ fontSize: '11px', color: '#9B9BA8' }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -263,18 +299,28 @@ export default function EditDrop() {
         {/* EXPIRY */}
         <div style={cardStyle}>
           <div style={secLabel}>Expiry</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <div style={{ fontSize: '14px', color: '#1C1830' }}>Current expiry</div>
-            <div style={{ fontSize: '13px', fontWeight: '500', color: getDaysLeft() <= 3 ? '#A32D2D' : '#0F6E56' }}>
-              {getDaysLeft()} day{getDaysLeft() !== 1 ? 's' : ''} left
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ fontSize: '14px', color: '#1C1830' }}>Time remaining</div>
+            <div style={{
+              fontSize: '13px', fontWeight: '500',
+              color: urgent ? '#DC2626' : '#0F6E56',
+              background: urgent ? '#FEF2F2' : '#E1F5EE',
+              padding: '4px 12px', borderRadius: '99px'
+            }}>
+              {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
             </div>
           </div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '8px', color: '#1C1830' }}>Extend by</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '10px', color: '#1C1830' }}>Extend by</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
             {[0, 7, 14, 30].map(d => (
-              <div key={d} onClick={() => setExtendDays(d)} style={{ border: `1px solid ${extendDays === d ? '#6040C8' : 'rgba(83,74,183,0.25)'}`, background: extendDays === d ? '#EDE9F9' : 'white', borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer' }}>
-                <div style={{ fontSize: '14px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d === 0 ? '—' : `+${d}`}</div>
-                <div style={{ fontSize: '10px', color: '#6B6485', marginTop: '2px' }}>{d === 0 ? 'no change' : 'days'}</div>
+              <div key={d} onClick={() => setExtendDays(d)} style={{
+                border: `1px solid ${extendDays === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
+                background: extendDays === d ? '#EDE9F9' : '#FAFAFA',
+                borderRadius: '10px', padding: '12px', textAlign: 'center', cursor: 'pointer',
+                transition: 'all .15s'
+              }}>
+                <div style={{ fontSize: '15px', fontFamily: 'Georgia, serif', color: '#6040C8', letterSpacing: '-0.01em' }}>{d === 0 ? '—' : `+${d}`}</div>
+                <div style={{ fontSize: '10px', color: '#9B9BA8', marginTop: '3px' }}>{d === 0 ? 'no change' : 'days'}</div>
               </div>
             ))}
           </div>
@@ -283,43 +329,49 @@ export default function EditDrop() {
         {/* OPTIONS */}
         <div style={cardStyle}>
           <div style={secLabel}>Options</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(83,74,183,0.1)' }}>
-            <div>
-              <div style={{ fontSize: '14px', color: '#1C1830' }}>Password protection</div>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '2px' }}>Require a password before viewing</div>
+          {[
+            { label: 'Password protection', desc: 'Require a password before viewing', value: hasPassword, onChange: setHasPassword },
+            { label: 'Show expiry countdown', desc: 'Viewers see how long the link has left', value: showExpiry, onChange: setShowExpiry },
+            { label: 'Allow download', desc: 'Viewers can save photos to their device', value: allowDownload, onChange: setAllowDownload }
+          ].map((opt, i, arr) => (
+            <div key={opt.label}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(83,74,183,0.08)' : 'none' }}>
+                <div>
+                  <div style={{ fontSize: '14px', color: '#1C1830' }}>{opt.label}</div>
+                  <div style={{ fontSize: '12px', color: '#9B9BA8', marginTop: '2px' }}>{opt.desc}</div>
+                </div>
+                <Toggle value={opt.value} onChange={opt.onChange} />
+              </div>
+              {opt.label === 'Password protection' && hasPassword && (
+                <div style={{ paddingBottom: '8px' }}>
+                  <input type="text" value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter a password for viewers" style={inputStyle} />
+                </div>
+              )}
             </div>
-            <Toggle value={hasPassword} onChange={setHasPassword} />
-          </div>
-          {hasPassword && (
-            <div style={{ paddingTop: '10px', paddingBottom: '4px' }}>
-              <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter a password for viewers" style={inputStyle} />
-            </div>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(83,74,183,0.1)' }}>
-            <div>
-              <div style={{ fontSize: '14px', color: '#1C1830' }}>Show expiry countdown</div>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '2px' }}>Viewers see how long the link has left</div>
-            </div>
-            <Toggle value={showExpiry} onChange={setShowExpiry} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
-            <div>
-              <div style={{ fontSize: '14px', color: '#1C1830' }}>Allow download</div>
-              <div style={{ fontSize: '12px', color: '#6B6485', marginTop: '2px' }}>Viewers can save photos to their device</div>
-            </div>
-            <Toggle value={allowDownload} onChange={setAllowDownload} />
-          </div>
+          ))}
         </div>
 
         {/* ACTIONS */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button onClick={handleSave} disabled={saving} style={{ background: '#6040C8', color: 'white', fontSize: '14px', fontWeight: '500', padding: '12px 24px', borderRadius: '9px', border: 'none', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', paddingBottom: '40px' }}>
+          <button onClick={handleSave} disabled={saving} style={{
+            background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500',
+            padding: '13px 28px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+            opacity: saving ? 0.7 : 1, letterSpacing: '-0.01em'
+          }}>
             {saving ? 'Saving...' : 'Save all changes'}
           </button>
-          <button onClick={() => window.location.href = `/drop/${slug}`} style={{ background: '#EDE9F9', color: '#6040C8', fontSize: '14px', fontWeight: '500', padding: '12px 20px', borderRadius: '9px', border: 'none', cursor: 'pointer' }}>
+          <button onClick={() => window.location.href = `/drop/${slug}`} style={{
+            background: '#EDE9F9', color: '#6040C8', fontSize: '15px', fontWeight: '500',
+            padding: '13px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer'
+          }}>
             View drop
           </button>
-          <button onClick={() => window.location.href = '/dashboard'} style={{ background: 'white', color: '#1C1830', fontSize: '14px', padding: '12px 20px', borderRadius: '9px', border: '1px solid rgba(83,74,183,0.25)', cursor: 'pointer' }}>
+          <button onClick={() => window.location.href = '/dashboard'} style={{
+            background: 'white', color: '#6B6485', fontSize: '15px',
+            padding: '13px 20px', borderRadius: '10px',
+            border: '1px solid rgba(83,74,183,0.15)', cursor: 'pointer'
+          }}>
             Dashboard
           </button>
         </div>
