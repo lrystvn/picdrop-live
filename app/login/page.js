@@ -2,6 +2,22 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 
+const PicdropLogo = () => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', justifyContent: 'center' }} onClick={() => window.location.href = '/'}>
+    <div style={{ width: 24, height: 24, background: '#6040C8', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.3"/>
+      </svg>
+    </div>
+    <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: '22px', fontWeight: '600', color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+      pic<span style={{ color: '#9B8FE4' }}>drop</span>
+    </span>
+  </div>
+)
+
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -9,6 +25,7 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [showPw, setShowPw] = useState(false)
 
   const handleAuth = async () => {
     setLoading(true)
@@ -32,83 +49,94 @@ export default function Login() {
     setLoading(false)
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 13px',
-    border: '1px solid rgba(83,74,183,0.25)',
-    borderRadius: '9px',
-    fontSize: '14px',
-    marginBottom: '10px',
-    fontFamily: 'sans-serif',
-    outline: 'none',
-    boxSizing: 'border-box'
-  }
+  const isError = message && !message.includes('Check your email')
 
   return (
     <div style={{
       minHeight: '100vh',
       background: '#1C1830',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '24px'
+      padding: '24px',
+      fontFamily: 'sans-serif'
     }}>
+      <div style={{ marginBottom: '32px' }}>
+        <PicdropLogo />
+      </div>
+
       <div style={{
         background: '#ffffff',
-        borderRadius: '14px',
-        padding: '40px 36px',
+        borderRadius: '18px',
+        padding: '36px 32px',
         maxWidth: '380px',
         width: '100%',
-        textAlign: 'center'
+        boxShadow: '0 0 0 1px rgba(83,74,183,0.1)'
       }}>
-        <div style={{
-          fontFamily: 'Georgia, serif',
-          fontSize: '22px',
-          marginBottom: '6px',
-          color: '#1C1830'
-        }}>
-          Pic<span style={{ color: '#6040C8', fontStyle: 'italic' }}>drop</span>
-        </div>
-        <div style={{
-          fontSize: '14px',
-          color: '#6B6485',
-          marginBottom: '28px'
-        }}>
-          {isSignUp ? 'Create your account' : 'Welcome back'}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1C1830', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+            {isSignUp ? 'Create an account' : 'Welcome back'}
+          </div>
+          <div style={{ fontSize: '14px', color: '#6B6485', lineHeight: 1.5 }}>
+            {isSignUp ? 'Start sharing photos privately in minutes.' : 'Sign in to manage your drops.'}
+          </div>
         </div>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={inputStyle}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
-        />
-        {isSignUp && (
-          <input
-            type="password"
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            style={inputStyle}
-          />
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#1C1830', marginBottom: '6px' }}>Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAuth()}
+              style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#1C1830', marginBottom: '6px' }}>Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPw ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAuth()}
+                style={{ width: '100%', padding: '11px 44px 11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+              />
+              <div onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '16px', opacity: 0.4, userSelect: 'none' }}>
+                {showPw ? '🙈' : '👁️'}
+              </div>
+            </div>
+          </div>
+
+          {isSignUp && (
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#1C1830', marginBottom: '6px' }}>Confirm password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAuth()}
+                style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+              />
+            </div>
+          )}
+        </div>
 
         {message && (
           <div style={{
             fontSize: '13px',
-            color: message.includes('match') || message.includes('error') ? '#A32D2D' : '#0F6E56',
+            color: isError ? '#A32D2D' : '#0F6E56',
             marginBottom: '14px',
-            padding: '8px',
-            background: message.includes('match') || message.includes('error') ? '#FDEAEA' : '#E1F5EE',
-            borderRadius: '8px'
+            padding: '10px 13px',
+            background: isError ? '#FEF2F2' : '#E1F5EE',
+            borderRadius: '8px',
+            lineHeight: 1.5
           }}>
             {message}
           </div>
@@ -121,29 +149,32 @@ export default function Login() {
             width: '100%',
             background: '#6040C8',
             color: 'white',
-            fontSize: '14px',
+            fontSize: '15px',
             fontWeight: '500',
-            padding: '12px',
+            padding: '13px',
             borderRadius: '9px',
             border: 'none',
-            cursor: 'pointer',
-            marginBottom: '14px',
-            opacity: loading ? 0.7 : 1
+            cursor: loading ? 'not-allowed' : 'pointer',
+            marginBottom: '16px',
+            opacity: loading ? 0.7 : 1,
+            letterSpacing: '-0.01em'
           }}
         >
           {loading ? 'Loading...' : isSignUp ? 'Create account' : 'Sign in'}
         </button>
 
-        <div
-          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setConfirmPassword('') }}
-          style={{
-            fontSize: '13px',
-            color: '#6040C8',
-            cursor: 'pointer'
-          }}
-        >
-          {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+        <div style={{ textAlign: 'center' }}>
+          <span
+            onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setConfirmPassword('') }}
+            style={{ fontSize: '13px', color: '#6040C8', cursor: 'pointer' }}
+          >
+            {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+          </span>
         </div>
+      </div>
+
+      <div style={{ marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
+        By continuing you agree to our Terms and Privacy Policy
       </div>
     </div>
   )
