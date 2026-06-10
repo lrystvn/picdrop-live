@@ -21,15 +21,25 @@ export default function Footer() {
           <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>Product</div>
-              {['Create a drop', 'Sign in', 'Pricing'].map(l => (
-                <div key={l} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '8px', cursor: 'pointer' }}>{l}</div>
-              ))}
+              {[
+  { label: 'Create a drop', href: '/create' },
+  { label: 'Sign in', href: '/login' },
+  { label: 'Pricing', href: '/pricing' },
+].map(l => (
+  <div key={l.label} onClick={() => window.location.href = l.href} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '8px', cursor: 'pointer' }}>{l.label}</div>
+))}
             </div>
             <div>
               <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>Company</div>
-              {['About', 'Privacy', 'Terms', 'Contact'].map(l => (
-                <div key={l} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '8px', cursor: 'pointer' }}>{l}</div>
-              ))}
+              {[
+  { label: 'About', href: '/about' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
+  { label: 'Contact', href: '/contact' },
+].map(l => (
+  <div key={l.label} onClick={() => window.location.href = l.href} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '8px', cursor: 'pointer' }}>{l.label}</div>
+))}
+              
             </div>
           </div>
         </div>

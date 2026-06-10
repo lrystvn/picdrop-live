@@ -26,6 +26,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [showPw, setShowPw] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   const handleAuth = async () => {
     setLoading(true)
@@ -33,6 +34,12 @@ export default function Login() {
 
     if (isSignUp && password !== confirmPassword) {
       setMessage('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    if (isSignUp && !agreedToTerms) {
+      setMessage('Please agree to the Terms of Service and Privacy Policy')
       setLoading(false)
       return
     }
@@ -126,6 +133,43 @@ export default function Login() {
               />
             </div>
           )}
+
+          {isSignUp && (
+            <div
+              onClick={() => setAgreedToTerms(!agreedToTerms)}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', paddingTop: '4px' }}
+            >
+              <div style={{
+                width: '18px', height: '18px', borderRadius: '5px', flexShrink: 0, marginTop: '1px',
+                background: agreedToTerms ? '#6040C8' : 'white',
+                border: `1.5px solid ${agreedToTerms ? '#6040C8' : 'rgba(83,74,183,0.3)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all .15s'
+              }}>
+                {agreedToTerms && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <div style={{ fontSize: '13px', color: '#6B6485', lineHeight: 1.5 }}>
+                I agree to the{' '}
+                <span
+                  onClick={e => { e.stopPropagation(); window.open('/terms', '_blank') }}
+                  style={{ color: '#6040C8', textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  Terms of Service
+                </span>
+                {' '}and{' '}
+                <span
+                  onClick={e => { e.stopPropagation(); window.open('/privacy', '_blank') }}
+                  style={{ color: '#6040C8', textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  Privacy Policy
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {message && (
@@ -165,7 +209,7 @@ export default function Login() {
 
         <div style={{ textAlign: 'center' }}>
           <span
-            onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setConfirmPassword('') }}
+            onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setConfirmPassword(''); setAgreedToTerms(false) }}
             style={{ fontSize: '13px', color: '#6040C8', cursor: 'pointer' }}
           >
             {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
@@ -174,7 +218,7 @@ export default function Login() {
       </div>
 
       <div style={{ marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-        By continuing you agree to our Terms and Privacy Policy
+        Your photos are private and automatically deleted on expiry.
       </div>
     </div>
   )
