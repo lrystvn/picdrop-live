@@ -46,6 +46,7 @@ export default function DropViewer() {
   const [pwError, setPwError] = useState('')
   const [lightbox, setLightbox] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 600)
@@ -67,13 +68,18 @@ export default function DropViewer() {
       setDrop(data)
       if (!data.password) { await loadPhotos(data.id); setAuthenticated(true) }
       await supabase.from('drops').update({ view_count: (data.view_count || 0) + 1 }).eq('id', data.id)
+
+      // Check if current user is the owner
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && user.id === data.user_id) setIsOwner(true)
+
       setLoading(false)
     }
     fetchDrop()
   }, [slug])
 
   const loadPhotos = async (dropId) => {
-    const { data } = await supabase.from('photos').select('*').eq('drop_id', dropId)
+    const { data } = await supabase.from('photos').select('*').eq('drop_id', dropId).order('order_index', { ascending: true })
     if (data) {
       const withUrls = data.map(p => {
         const { data: urlData } = supabase.storage.from('photos').getPublicUrl(p.file_path)
@@ -100,14 +106,11 @@ export default function DropViewer() {
   const isDark = ['electric','darkroom','earthy','ocean','film'].includes(drop?.vibe)
   const pad = isMobile ? '12px' : '24px'
 
-  // Cover photo — either explicitly set or first photo
   const coverPhoto = drop?.cover_photo
     ? photos.find(p => p.file_path === drop.cover_photo)
     : photos[0]
 
-  const gridPhotos = drop?.cover_photo
-    ? photos
-    : photos.slice(1)
+  const gridPhotos = drop?.cover_photo ? photos : photos.slice(1)
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -197,38 +200,30 @@ export default function DropViewer() {
       {/* NAV */}
       <nav style={{ background: v.navBg, padding: `0 ${pad}`, height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${v.border}`, position: 'sticky', top: 0, zIndex: 100 }}>
         <PicdropLogo accent={v.accent} />
-        <button onClick={() => window.location.href = '/create'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 14px', borderRadius: '9px', border: 'none', cursor: 'pointer' }}>
-          {isMobile ? '+ Create' : '+ Create your own'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isOwner ? (
+            <>
+              <button onClick={() => window.location.href = `/edit/${slug}`} style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
+                Edit
+              </button>
+              <button onClick={() => window.location.href = '/dashboard'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                {isMobile ? 'Dashboard' : '← Dashboard'}
+              </button>
+            </>
+          ) : (
+            <button onClick={() => window.location.href = '/create'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 14px', borderRadius: '9px', border: 'none', cursor: 'pointer' }}>
+              {isMobile ? '+ Create' : '+ Create your own'}
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* COVER PHOTO */}
       {coverPhoto && (
-        <div
-          onClick={() => setLightbox(photos.indexOf(coverPhoto))}
-          style={{
-            width: '100%',
-            height: isMobile ? '240px' : '420px',
-            position: 'relative',
-            cursor: 'pointer',
-            overflow: 'hidden'
-          }}
-        >
-          <img
-            src={coverPhoto.url}
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-          {/* Gradient overlay for text legibility */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%)'
-          }} />
-          {/* Title overlay on cover */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            padding: isMobile ? '20px 16px' : '32px',
-          }}>
+        <div onClick={() => setLightbox(photos.indexOf(coverPhoto))} style={{ width: '100%', height: isMobile ? '240px' : '420px', position: 'relative', cursor: 'pointer', overflow: 'hidden' }}>
+          <img src={coverPhoto.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: isMobile ? '20px 16px' : '32px' }}>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', marginBottom: '6px' }}>
               picdrop.live/drop/{slug}
             </div>
@@ -282,30 +277,17 @@ export default function DropViewer() {
       )}
 
       {/* PHOTOS GRID */}
-      <div style={{ maxWidth: '860px', margin: coverPhoto ? '0 auto' : '0 auto', padding: spacing.gap === '0px' ? '0' : `${coverPhoto ? '12px' : '0'} ${isMobile ? '4px' : '24px'} 0` }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: spacing.gap === '0px' ? '0' : `${coverPhoto ? '12px' : '0'} ${isMobile ? '4px' : '24px'} 0` }}>
         {gridPhotos.length === 0 && !coverPhoto ? (
           <div style={{ textAlign: 'center', padding: '60px', color: v.subtext, fontSize: '14px', border: `1px dashed ${v.border}`, borderRadius: '14px', margin: `0 ${pad}` }}>
             No photos yet
           </div>
         ) : gridPhotos.length > 0 ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: getGridCols(),
-            gap: isMobile ? (spacing.gap === '12px' ? '3px' : spacing.gap === '4px' ? '2px' : '0px') : spacing.gap,
-            borderRadius: isMobile ? '8px' : spacing.borderRadius,
-            overflow: 'hidden'
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: getGridCols(), gap: isMobile ? (spacing.gap === '12px' ? '3px' : spacing.gap === '4px' ? '2px' : '0px') : spacing.gap, borderRadius: isMobile ? '8px' : spacing.borderRadius, overflow: 'hidden' }}>
             {gridPhotos.map((p, i) => {
               const originalIndex = photos.indexOf(p)
               return (
-                <div key={i} onClick={() => setLightbox(originalIndex)} style={{
-                  aspectRatio: !isMobile && drop.layout === 'masonry' && i === 0 ? 'unset' : '1',
-                  gridRow: !isMobile && drop.layout === 'masonry' && i === 0 ? 'span 2' : 'auto',
-                  overflow: 'hidden', cursor: 'pointer',
-                  borderRadius: spacing.gap === '12px' ? (isMobile ? '4px' : '8px') : '0px',
-                  border: drop.spacing === 'airy' ? `2px solid ${v.bg}` : 'none',
-                  position: 'relative'
-                }}>
+                <div key={i} onClick={() => setLightbox(originalIndex)} style={{ aspectRatio: !isMobile && drop.layout === 'masonry' && i === 0 ? 'unset' : '1', gridRow: !isMobile && drop.layout === 'masonry' && i === 0 ? 'span 2' : 'auto', overflow: 'hidden', cursor: 'pointer', borderRadius: spacing.gap === '12px' ? (isMobile ? '4px' : '8px') : '0px', border: drop.spacing === 'airy' ? `2px solid ${v.bg}` : 'none', position: 'relative' }}>
                   <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   {p.caption && !isMobile && (
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', padding: '16px 8px 6px', pointerEvents: 'none' }}>

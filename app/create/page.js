@@ -76,32 +76,18 @@ export default function Create() {
     setPhotos(prev => prev.map((p, i) => i === index ? { ...p, caption: value } : p))
   }
 
-  // Drag and drop handlers
-  const handleDragStart = (index) => {
-    dragItem.current = index
-    setDragIndex(index)
-  }
-
-  const handleDragEnter = (index) => {
-    dragOverItem.current = index
-    setDragOverIndex(index)
-  }
-
+  const handleDragStart = (index) => { dragItem.current = index; setDragIndex(index) }
+  const handleDragEnter = (index) => { dragOverItem.current = index; setDragOverIndex(index) }
   const handleDragEnd = () => {
     if (dragItem.current === null || dragOverItem.current === null) return
-    if (dragItem.current === dragOverItem.current) {
-      setDragIndex(null)
-      setDragOverIndex(null)
-      return
+    if (dragItem.current !== dragOverItem.current) {
+      const newPhotos = [...photos]
+      const dragged = newPhotos.splice(dragItem.current, 1)[0]
+      newPhotos.splice(dragOverItem.current, 0, dragged)
+      setPhotos(newPhotos)
     }
-    const newPhotos = [...photos]
-    const dragged = newPhotos.splice(dragItem.current, 1)[0]
-    newPhotos.splice(dragOverItem.current, 0, dragged)
-    setPhotos(newPhotos)
-    dragItem.current = null
-    dragOverItem.current = null
-    setDragIndex(null)
-    setDragOverIndex(null)
+    dragItem.current = null; dragOverItem.current = null
+    setDragIndex(null); setDragOverIndex(null)
   }
 
   const checkSlug = async (val) => {
@@ -147,7 +133,8 @@ export default function Create() {
         .select()
         .single()
 
-      if (dropError) { alert('Drop error: ' + dropError.message); setLoading(false); return }
+
+      if (dropError) { alert('Drop error: ' + JSON.stringify(dropError)); setLoading(false); return }
 
       const BATCH_SIZE = 5
       let completed = 0
@@ -183,20 +170,9 @@ export default function Create() {
 
   const selectedVibe = vibes.find(v => v.id === vibe)
   const pad = isMobile ? '16px' : '24px'
-
-  const cardStyle = {
-    background: '#fff', border: '1px solid rgba(83,74,183,0.1)',
-    borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px'
-  }
-  const secLabel = {
-    fontSize: '11px', fontWeight: '600', color: '#6040C8',
-    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px'
-  }
-  const inputStyle = {
-    width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)',
-    borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none',
-    boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA'
-  }
+  const cardStyle = { background: '#fff', border: '1px solid rgba(83,74,183,0.1)', borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px' }
+  const secLabel = { fontSize: '11px', fontWeight: '600', color: '#6040C8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }
+  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
 
   const Toggle = ({ value, onChange }) => (
     <div onClick={() => onChange(!value)} style={{ width: '42px', height: '24px', borderRadius: '99px', cursor: 'pointer', background: value ? '#6040C8' : '#D3D1C7', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
@@ -210,7 +186,7 @@ export default function Create() {
         <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
           <PicdropLogo onClick={() => {}} />
         </div>
-        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'Georgia, serif', marginBottom: '8px', letterSpacing: '-0.01em' }}>
+        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'Georgia, serif', marginBottom: '8px' }}>
           {uploadProgress.current === 0 ? 'Creating your drop...' : 'Uploading photos...'}
         </div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', marginBottom: '28px' }}>
@@ -235,13 +211,7 @@ export default function Create() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
-      <nav style={{
-        background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)',
-        padding: `0 ${pad}`, height: '60px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        position: 'sticky', top: 0, zIndex: 100
-      }}>
+      <nav style={{ background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)', padding: `0 ${pad}`, height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 100 }}>
         <PicdropLogo onClick={() => window.location.href = '/'} />
         <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
           ← {isMobile ? 'Back' : 'Dashboard'}
@@ -250,37 +220,21 @@ export default function Create() {
 
       <div style={{ maxWidth: '660px', margin: '0 auto', padding: `${isMobile ? '24px' : '40px'} ${pad}` }}>
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>
-            New photo drop
-          </div>
-          <div style={{ fontSize: '14px', color: '#6B6485', lineHeight: 1.5 }}>
-            Upload your photos, pick a vibe, set your link. Done in minutes.
-          </div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>New photo drop</div>
+          <div style={{ fontSize: '14px', color: '#6B6485', lineHeight: 1.5 }}>Upload your photos, pick a vibe, set your link. Done in minutes.</div>
         </div>
 
         {/* PHOTOS */}
         <div style={cardStyle}>
           <div style={secLabel}>Photos</div>
-          <label style={{
-            display: 'block', border: '2px dashed rgba(83,74,183,0.2)',
-            borderRadius: '12px', padding: isMobile ? '28px 16px' : '36px 20px',
-            textAlign: 'center', cursor: 'pointer', background: '#FAFAFA'
-          }}>
+          <label style={{ display: 'block', border: '2px dashed rgba(83,74,183,0.2)', borderRadius: '12px', padding: isMobile ? '28px 16px' : '36px 20px', textAlign: 'center', cursor: 'pointer', background: '#FAFAFA' }}>
             <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display: 'none' }} />
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>📷</div>
-            <div style={{ fontSize: '15px', fontWeight: '500', marginBottom: '4px', color: '#1C1830' }}>
-              {isMobile ? 'Tap to add photos' : 'Click to upload photos'}
-            </div>
-            <div style={{ fontSize: '12px', color: '#9B9BA8' }}>
-              {isMobile ? 'Camera roll · max 50 photos' : 'JPG, PNG, HEIC · max 50 photos'}
-            </div>
+            <div style={{ fontSize: '15px', fontWeight: '500', marginBottom: '4px', color: '#1C1830' }}>{isMobile ? 'Tap to add photos' : 'Click to upload photos'}</div>
+            <div style={{ fontSize: '12px', color: '#9B9BA8' }}>{isMobile ? 'Camera roll · max 50 photos' : 'JPG, PNG, HEIC · max 50 photos'}</div>
           </label>
 
-          {loadingPhotos && (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#6040C8', fontSize: '14px' }}>
-              ⏳ Loading your photos...
-            </div>
-          )}
+          {loadingPhotos && <div style={{ textAlign: 'center', padding: '20px', color: '#6040C8', fontSize: '14px' }}>⏳ Loading your photos...</div>}
 
           {!loadingPhotos && photos.length > 0 && (
             <div style={{ marginTop: '16px' }}>
@@ -290,68 +244,30 @@ export default function Create() {
               </div>
               <div style={{ display: 'grid', gap: '8px' }}>
                 {photos.map((p, i) => (
-                  <div
-                    key={i}
-                    draggable
-                    onDragStart={() => handleDragStart(i)}
-                    onDragEnter={() => handleDragEnter(i)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={e => e.preventDefault()}
-                    style={{
-                      display: 'flex', gap: '12px', alignItems: 'flex-start',
-                      padding: '8px', borderRadius: '10px',
-                      background: dragOverIndex === i && dragIndex !== i ? 'rgba(96,64,200,0.08)' : 'transparent',
-                      border: dragOverIndex === i && dragIndex !== i ? '1px solid rgba(96,64,200,0.25)' : '1px solid transparent',
-                      opacity: dragIndex === i ? 0.4 : 1,
-                      transition: 'all .15s',
-                      cursor: 'grab'
-                    }}
-                  >
-                    {/* DRAG HANDLE */}
-                    <div style={{ display: 'flex', alignItems: 'center', paddingTop: '4px', flexShrink: 0, cursor: 'grab' }}>
+                  <div key={i} draggable onDragStart={() => handleDragStart(i)} onDragEnter={() => handleDragEnter(i)} onDragEnd={handleDragEnd} onDragOver={e => e.preventDefault()}
+                    style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', padding: '8px', borderRadius: '10px', background: dragOverIndex === i && dragIndex !== i ? 'rgba(96,64,200,0.08)' : 'transparent', border: dragOverIndex === i && dragIndex !== i ? '1px solid rgba(96,64,200,0.25)' : '1px solid transparent', opacity: dragIndex === i ? 0.4 : 1, transition: 'all .15s', cursor: 'grab' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', paddingTop: '4px', flexShrink: 0 }}>
                       <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
-                        <circle cx="4" cy="4" r="1.5" fill="#D3D1C7"/>
-                        <circle cx="4" cy="10" r="1.5" fill="#D3D1C7"/>
-                        <circle cx="4" cy="16" r="1.5" fill="#D3D1C7"/>
-                        <circle cx="10" cy="4" r="1.5" fill="#D3D1C7"/>
-                        <circle cx="10" cy="10" r="1.5" fill="#D3D1C7"/>
-                        <circle cx="10" cy="16" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="4" cy="4" r="1.5" fill="#D3D1C7"/><circle cx="4" cy="10" r="1.5" fill="#D3D1C7"/><circle cx="4" cy="16" r="1.5" fill="#D3D1C7"/>
+                        <circle cx="10" cy="4" r="1.5" fill="#D3D1C7"/><circle cx="10" cy="10" r="1.5" fill="#D3D1C7"/><circle cx="10" cy="16" r="1.5" fill="#D3D1C7"/>
                       </svg>
                     </div>
-
-                    {/* PHOTO + INDEX */}
                     <div style={{ position: 'relative', flexShrink: 0 }}>
                       <div style={{ width: isMobile ? '64px' : '72px', height: isMobile ? '64px' : '72px', borderRadius: '9px', overflow: 'hidden' }}>
                         <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
-                      {i === 0 && (
-                        <div style={{ position: 'absolute', bottom: '3px', left: '3px', fontSize: '9px', fontWeight: '600', background: 'rgba(96,64,200,0.9)', color: 'white', padding: '2px 5px', borderRadius: '4px', letterSpacing: '0.04em' }}>
-                          COVER
-                        </div>
-                      )}
+                      {i === 0 && <div style={{ position: 'absolute', bottom: '3px', left: '3px', fontSize: '9px', fontWeight: '600', background: 'rgba(96,64,200,0.9)', color: 'white', padding: '2px 5px', borderRadius: '4px', letterSpacing: '0.04em' }}>COVER</div>}
                       <div onClick={() => removePhoto(i)} style={{ position: 'absolute', top: '3px', right: '3px', width: '18px', height: '18px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px', color: 'white' }}>×</div>
                     </div>
-
-                    {/* CAPTION */}
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '11px', color: '#9B9BA8', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.name}
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Add a caption (optional)"
-                        value={p.caption}
-                        onChange={e => updatePhotoCaption(i, e.target.value)}
-                        onMouseDown={e => e.stopPropagation()}
-                        style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '7px', fontSize: '13px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
-                      />
+                      <div style={{ fontSize: '11px', color: '#9B9BA8', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                      <input type="text" placeholder="Add a caption (optional)" value={p.caption} onChange={e => updatePhotoCaption(i, e.target.value)} onMouseDown={e => e.stopPropagation()}
+                        style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '7px', fontSize: '13px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }} />
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '10px', textAlign: 'center' }}>
-                First photo becomes the cover image
-              </div>
+              <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '10px', textAlign: 'center' }}>First photo becomes the cover image</div>
             </div>
           )}
         </div>
@@ -365,8 +281,7 @@ export default function Create() {
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '7px', color: '#1C1830' }}>Caption <span style={{ color: '#9B9BA8', fontWeight: '400' }}>(optional)</span></label>
-            <textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="A short message for your viewers..."
-              style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
+            <textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="A short message for your viewers..." style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
           </div>
         </div>
 
@@ -378,33 +293,21 @@ export default function Create() {
             {isMobile ? (
               <div>
                 <div style={{ fontSize: '12px', color: '#9B9BA8', marginBottom: '6px', fontFamily: 'monospace' }}>picdrop.live/drop/</div>
-                <input type="text" value={slug} onChange={e => checkSlug(e.target.value)} placeholder="yourslug"
-                  style={{ ...inputStyle, fontFamily: 'monospace' }} />
+                <input type="text" value={slug} onChange={e => checkSlug(e.target.value)} placeholder="yourslug" style={{ ...inputStyle, fontFamily: 'monospace' }} />
               </div>
             ) : (
               <div style={{ display: 'flex' }}>
-                <div style={{ fontSize: '12px', color: '#6B6485', background: '#EDE9F9', border: '1px solid rgba(83,74,183,0.18)', borderRight: 'none', padding: '11px 12px', borderRadius: '9px 0 0 9px', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
-                  picdrop.live/drop/
-                </div>
-                <input type="text" value={slug} onChange={e => checkSlug(e.target.value)} placeholder="yourslug"
-                  style={{ flex: 1, padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '0 9px 9px 0', fontSize: '14px', fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', background: '#FAFAFA', color: '#1C1830' }} />
+                <div style={{ fontSize: '12px', color: '#6B6485', background: '#EDE9F9', border: '1px solid rgba(83,74,183,0.18)', borderRight: 'none', padding: '11px 12px', borderRadius: '9px 0 0 9px', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>picdrop.live/drop/</div>
+                <input type="text" value={slug} onChange={e => checkSlug(e.target.value)} placeholder="yourslug" style={{ flex: 1, padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '0 9px 9px 0', fontSize: '14px', fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', background: '#FAFAFA', color: '#1C1830' }} />
               </div>
             )}
-            {slugStatus && (
-              <div style={{ fontSize: '12px', marginTop: '6px', color: slugStatus === 'available' ? '#0F6E56' : '#DC2626' }}>
-                {slugStatus === 'available' ? '✓ Available' : '✗ Already taken'}
-              </div>
-            )}
+            {slugStatus && <div style={{ fontSize: '12px', marginTop: '6px', color: slugStatus === 'available' ? '#0F6E56' : '#DC2626' }}>{slugStatus === 'available' ? '✓ Available' : '✗ Already taken'}</div>}
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '10px', color: '#1C1830' }}>Expires after</label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {[7, 14, 30].map(d => (
-                <div key={d} onClick={() => setExpiry(d)} style={{
-                  border: `1px solid ${expiry === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
-                  background: expiry === d ? '#EDE9F9' : '#FAFAFA',
-                  borderRadius: '10px', padding: '14px 12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
-                }}>
+                <div key={d} onClick={() => setExpiry(d)} style={{ border: `1px solid ${expiry === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`, background: expiry === d ? '#EDE9F9' : '#FAFAFA', borderRadius: '10px', padding: '14px 12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                   <div style={{ fontSize: '20px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d}</div>
                   <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '2px' }}>days</div>
                 </div>
@@ -416,26 +319,16 @@ export default function Create() {
         {/* VIBE */}
         <div style={cardStyle}>
           <div style={secLabel}>Choose a vibe</div>
-          <div style={{ fontSize: '13px', color: '#6B6485', marginBottom: '16px', lineHeight: 1.5 }}>
-            Sets the whole look and feel of your drop page.
-          </div>
+          <div style={{ fontSize: '13px', color: '#6B6485', marginBottom: '16px', lineHeight: 1.5 }}>Sets the whole look and feel of your drop page.</div>
           <div style={{ background: selectedVibe.bg, borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(0,0,0,0.08)' }}>
-            <div style={{ fontFamily: selectedVibe.font, fontSize: '15px', color: selectedVibe.accent, marginBottom: '10px', opacity: 0.9 }}>
-              Preview — {selectedVibe.name}
-            </div>
+            <div style={{ fontFamily: selectedVibe.font, fontSize: '15px', color: selectedVibe.accent, marginBottom: '10px', opacity: 0.9 }}>Preview — {selectedVibe.name}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: spacing === 'tight' ? '0px' : spacing === 'airy' ? '8px' : '3px', borderRadius: '8px', overflow: 'hidden' }}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} style={{ aspectRatio: '1', background: `${selectedVibe.accent}33`, borderRadius: spacing === 'airy' ? '4px' : '0px' }} />
-              ))}
+              {[...Array(6)].map((_, i) => <div key={i} style={{ aspectRatio: '1', background: `${selectedVibe.accent}33`, borderRadius: spacing === 'airy' ? '4px' : '0px' }} />)}
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
             {vibes.map(v => (
-              <div key={v.id} onClick={() => setVibe(v.id)} style={{
-                border: `1.5px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.12)'}`,
-                borderRadius: '12px', padding: '12px', cursor: 'pointer',
-                background: vibe === v.id ? '#EDE9F9' : '#FAFAFA', transition: 'all .15s'
-              }}>
+              <div key={v.id} onClick={() => setVibe(v.id)} style={{ border: `1.5px solid ${vibe === v.id ? '#6040C8' : 'rgba(83,74,183,0.12)'}`, borderRadius: '12px', padding: '12px', cursor: 'pointer', background: vibe === v.id ? '#EDE9F9' : '#FAFAFA', transition: 'all .15s' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
                   <span style={{ fontSize: '16px' }}>{v.emoji}</span>
                   <span style={{ fontSize: '12px', fontWeight: '500', color: '#1C1830' }}>{v.name}</span>
@@ -446,16 +339,8 @@ export default function Create() {
           </div>
           <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '10px', color: '#1C1830' }}>Photo spacing</label>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {[
-              { id: 'tight', label: 'Tight', desc: 'No gaps' },
-              { id: 'normal', label: 'Normal', desc: 'Small gaps' },
-              { id: 'airy', label: 'Airy', desc: 'Spaced out' }
-            ].map(s => (
-              <div key={s.id} onClick={() => setSpacing(s.id)} style={{
-                flex: 1, border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`,
-                background: spacing === s.id ? '#EDE9F9' : '#FAFAFA',
-                borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
-              }}>
+            {[{ id: 'tight', label: 'Tight', desc: 'No gaps' }, { id: 'normal', label: 'Normal', desc: 'Small gaps' }, { id: 'airy', label: 'Airy', desc: 'Spaced out' }].map(s => (
+              <div key={s.id} onClick={() => setSpacing(s.id)} style={{ flex: 1, border: `1px solid ${spacing === s.id ? '#6040C8' : 'rgba(83,74,183,0.18)'}`, background: spacing === s.id ? '#EDE9F9' : '#FAFAFA', borderRadius: '9px', padding: '10px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                 <div style={{ fontSize: '13px', fontWeight: '500', color: spacing === s.id ? '#6040C8' : '#1C1830', marginBottom: '2px' }}>{s.label}</div>
                 <div style={{ fontSize: '11px', color: '#9B9BA8' }}>{s.desc}</div>
               </div>
@@ -481,8 +366,7 @@ export default function Create() {
               </div>
               {opt.label === 'Password protection' && hasPassword && (
                 <div style={{ paddingBottom: '8px' }}>
-                  <input type="text" value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Enter a password for viewers" style={inputStyle} />
+                  <input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter a password for viewers" style={inputStyle} />
                 </div>
               )}
             </div>
@@ -491,18 +375,10 @@ export default function Create() {
 
         {/* PUBLISH */}
         <div style={{ display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row', paddingBottom: '40px' }}>
-          <button onClick={handlePublish} disabled={loading} style={{
-            background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500',
-            padding: '14px 32px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-            opacity: loading ? 0.7 : 1, letterSpacing: '-0.01em'
-          }}>
+          <button onClick={handlePublish} disabled={loading} style={{ background: '#6040C8', color: 'white', fontSize: '15px', fontWeight: '500', padding: '14px 32px', borderRadius: '10px', border: 'none', cursor: 'pointer', opacity: loading ? 0.7 : 1, letterSpacing: '-0.01em' }}>
             Publish drop
           </button>
-          <button onClick={() => window.location.href = '/dashboard'} style={{
-            background: 'white', color: '#6B6485', fontSize: '15px',
-            padding: '14px 24px', borderRadius: '10px',
-            border: '1px solid rgba(83,74,183,0.15)', cursor: 'pointer'
-          }}>
+          <button onClick={() => window.location.href = '/dashboard'} style={{ background: 'white', color: '#6B6485', fontSize: '15px', padding: '14px 24px', borderRadius: '10px', border: '1px solid rgba(83,74,183,0.15)', cursor: 'pointer' }}>
             Cancel
           </button>
         </div>
