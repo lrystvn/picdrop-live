@@ -3,7 +3,7 @@ import { PicdropLogo } from '../navbar'
 
 export default function Privacy() {
   return (
-    <div style={{ minHeight: '100vh', background: '#1C1830', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#1C1830', fontFamily: 'var(--font-inter)' }}>
       <nav style={{ background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)', padding: '0 28px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 100 }}>
         <PicdropLogo />
         <button onClick={() => window.location.href = '/create'} style={{ background: '#6040C8', color: 'white', fontSize: '14px', fontWeight: '500', padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
@@ -13,7 +13,7 @@ export default function Privacy() {
 
       <div style={{ maxWidth: '680px', margin: '0 auto', padding: '72px 24px' }}>
         <div style={{ fontSize: '11px', fontWeight: '500', color: '#9B8FE4', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>Privacy Policy</div>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 42px)', color: '#ffffff', lineHeight: 1.15, marginBottom: '12px', letterSpacing: '-0.02em', fontWeight: '400' }}>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 42px)', color: '#ffffff', lineHeight: 1.15, marginBottom: '12px', letterSpacing: '-0.02em', fontWeight: '400' }}>
           Your privacy matters.
         </h1>
         <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', marginBottom: '48px' }}>Last updated June 2026</div>

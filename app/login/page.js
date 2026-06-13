@@ -67,7 +67,7 @@ export default function Login() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px',
-      fontFamily: 'sans-serif'
+      fontFamily: 'var(--font-inter)'
     }}>
       <div style={{ marginBottom: '32px' }}>
         <PicdropLogo />
@@ -82,7 +82,7 @@ export default function Login() {
         boxShadow: '0 0 0 1px rgba(83,74,183,0.1)'
       }}>
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1C1830', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', color: '#1C1830', marginBottom: '6px', letterSpacing: '-0.02em' }}>
             {isSignUp ? 'Create an account' : 'Welcome back'}
           </div>
           <div style={{ fontSize: '14px', color: '#6B6485', lineHeight: 1.5 }}>
@@ -99,7 +99,7 @@ export default function Login() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAuth()}
-              style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+              style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
             />
           </div>
 
@@ -112,7 +112,7 @@ export default function Login() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAuth()}
-                style={{ width: '100%', padding: '11px 44px 11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+                style={{ width: '100%', padding: '11px 44px 11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
               />
               <div onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: '16px', opacity: 0.4, userSelect: 'none' }}>
                 {showPw ? '🙈' : '👁️'}
@@ -129,7 +129,7 @@ export default function Login() {
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAuth()}
-                style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
+                style={{ width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.2)', borderRadius: '9px', fontSize: '15px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }}
               />
             </div>
           )}

@@ -7,7 +7,7 @@ import Footer from './footer'
 
 export default function Home() {
   return (
-    <div style={{ minHeight: '100vh', background: '#1C1830', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#1C1830', fontFamily: 'var(--font-inter)' }}>
       <Navbar />
 
       {/* HERO */}
@@ -26,7 +26,7 @@ export default function Home() {
           </div>
 
           <h1 style={{
-            fontFamily: 'Georgia, serif',
+            fontFamily: 'var(--font-serif)',
             fontSize: 'clamp(38px, 5.5vw, 64px)',
             color: '#ffffff',
             lineHeight: 1.08,
@@ -118,7 +118,7 @@ export default function Home() {
               { val: '0', label: 'social accounts needed to view' },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '22px', fontWeight: '500', color: '#ffffff', fontFamily: 'Georgia, serif', letterSpacing: '-0.02em' }}>{s.val}</div>
+                <div style={{ fontSize: '22px', fontWeight: '500', color: '#ffffff', fontFamily: 'var(--font-serif)', letterSpacing: '-0.02em' }}>{s.val}</div>
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginTop: '3px', letterSpacing: '0.02em' }}>{s.label}</div>
               </div>
             ))}

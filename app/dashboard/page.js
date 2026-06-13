@@ -78,7 +78,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'var(--font-inter)' }}>
 
       {/* NAV */}
       <nav style={{
@@ -103,7 +103,7 @@ export default function Dashboard() {
         {/* HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '4px' }}>Your drops</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '30px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '4px' }}>Your drops</div>
             <div style={{ fontSize: '14px', color: '#6B6485' }}>
               {activeDrops.length} active · {drops.length} total · {totalViews} views
             </div>

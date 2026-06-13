@@ -122,7 +122,7 @@ export default function DropViewer() {
     <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '24px' }}>
       <div>
         <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Drop not found</div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Drop not found</div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>This link doesn't exist or has expired.</div>
       </div>
     </div>
@@ -132,7 +132,7 @@ export default function DropViewer() {
     <div style={{ minHeight: '100vh', background: '#1C1830', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '24px' }}>
       <div>
         <div style={{ fontSize: '32px', marginBottom: '12px' }}>⏱</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>This drop has expired</div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>This drop has expired</div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>The link has expired and photos have been deleted.</div>
       </div>
     </div>

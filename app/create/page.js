@@ -172,7 +172,7 @@ export default function Create() {
   const pad = isMobile ? '16px' : '24px'
   const cardStyle = { background: '#fff', border: '1px solid rgba(83,74,183,0.1)', borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px' }
   const secLabel = { fontSize: '11px', fontWeight: '600', color: '#6040C8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }
-  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
+  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
 
   const Toggle = ({ value, onChange }) => (
     <div onClick={() => onChange(!value)} style={{ width: '42px', height: '24px', borderRadius: '99px', cursor: 'pointer', background: value ? '#6040C8' : '#D3D1C7', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
@@ -186,7 +186,7 @@ export default function Create() {
         <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
           <PicdropLogo onClick={() => {}} />
         </div>
-        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'Georgia, serif', marginBottom: '8px' }}>
+        <div style={{ fontSize: '20px', color: '#fff', fontFamily: 'var(--font-serif)', marginBottom: '8px' }}>
           {uploadProgress.current === 0 ? 'Creating your drop...' : 'Uploading photos...'}
         </div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', marginBottom: '28px' }}>
@@ -210,7 +210,7 @@ export default function Create() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'var(--font-inter)' }}>
       <nav style={{ background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)', padding: `0 ${pad}`, height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 100 }}>
         <PicdropLogo onClick={() => window.location.href = '/'} />
         <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
@@ -220,7 +220,7 @@ export default function Create() {
 
       <div style={{ maxWidth: '660px', margin: '0 auto', padding: `${isMobile ? '24px' : '40px'} ${pad}` }}>
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>New photo drop</div>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>New photo drop</div>
           <div style={{ fontSize: '14px', color: '#6B6485', lineHeight: 1.5 }}>Upload your photos, pick a vibe, set your link. Done in minutes.</div>
         </div>
 
@@ -262,7 +262,7 @@ export default function Create() {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '11px', color: '#9B9BA8', marginBottom: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
                       <input type="text" placeholder="Add a caption (optional)" value={p.caption} onChange={e => updatePhotoCaption(i, e.target.value)} onMouseDown={e => e.stopPropagation()}
-                        style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '7px', fontSize: '13px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }} />
+                        style={{ width: '100%', padding: '8px 10px', border: '1px solid rgba(83,74,183,0.15)', borderRadius: '7px', fontSize: '13px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }} />
                     </div>
                   </div>
                 ))}
@@ -308,7 +308,7 @@ export default function Create() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {[7, 14, 30].map(d => (
                 <div key={d} onClick={() => setExpiry(d)} style={{ border: `1px solid ${expiry === d ? '#6040C8' : 'rgba(83,74,183,0.18)'}`, background: expiry === d ? '#EDE9F9' : '#FAFAFA', borderRadius: '10px', padding: '14px 12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s' }}>
-                  <div style={{ fontSize: '20px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d}</div>
+                  <div style={{ fontSize: '20px', fontFamily: 'var(--font-serif)', color: '#6040C8' }}>{d}</div>
                   <div style={{ fontSize: '11px', color: '#9B9BA8', marginTop: '2px' }}>days</div>
                 </div>
               ))}

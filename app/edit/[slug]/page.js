@@ -198,7 +198,7 @@ export default function EditDrop() {
   const pad = isMobile ? '16px' : '24px'
   const cardStyle = { background: '#fff', border: '1px solid rgba(83,74,183,0.1)', borderRadius: '16px', padding: isMobile ? '18px' : '24px', marginBottom: '12px' }
   const secLabel = { fontSize: '11px', fontWeight: '600', color: '#6040C8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '16px' }
-  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
+  const inputStyle = { width: '100%', padding: '11px 13px', border: '1px solid rgba(83,74,183,0.18)', borderRadius: '9px', fontSize: '15px', fontFamily: 'var(--font-inter)', outline: 'none', boxSizing: 'border-box', color: '#1C1830', background: '#FAFAFA' }
 
   const Toggle = ({ value, onChange }) => (
     <div onClick={() => onChange(!value)} style={{ width: '42px', height: '24px', borderRadius: '99px', cursor: 'pointer', background: value ? '#6040C8' : '#D3D1C7', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
@@ -216,7 +216,7 @@ export default function EditDrop() {
   const urgent = daysLeft <= 3
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'var(--font-inter)' }}>
 
       {/* NAV */}
       <nav style={{
@@ -236,7 +236,7 @@ export default function EditDrop() {
 
         {/* PAGE HEADER */}
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: isMobile ? '26px' : '32px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '6px' }}>
             Edit drop
           </div>
           <div style={{ fontSize: '14px', color: '#6B6485', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -409,7 +409,7 @@ export default function EditDrop() {
                 background: extendDays === d ? '#EDE9F9' : '#FAFAFA',
                 borderRadius: '10px', padding: '12px', textAlign: 'center', cursor: 'pointer', transition: 'all .15s'
               }}>
-                <div style={{ fontSize: '15px', fontFamily: 'Georgia, serif', color: '#6040C8' }}>{d === 0 ? '—' : `+${d}`}</div>
+                <div style={{ fontSize: '15px', fontFamily: 'var(--font-serif)', color: '#6040C8' }}>{d === 0 ? '—' : `+${d}`}</div>
                 <div style={{ fontSize: '10px', color: '#9B9BA8', marginTop: '3px' }}>{d === 0 ? 'no change' : 'days'}</div>
               </div>
             ))}
