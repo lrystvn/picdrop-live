@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 
 const PicdropLogo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={() => window.location.href = '/dashboard'}>
     <div style={{ width: 22, height: 22, background: '#6040C8', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>
@@ -19,9 +19,17 @@ const PicdropLogo = () => (
   </div>
 )
 
+const getGreeting = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [drops, setDrops] = useState([])
+  const [dropPhotos, setDropPhotos] = useState({})
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
 
@@ -42,7 +50,28 @@ export default function Dashboard() {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    if (data) setDrops(data)
+    if (data) {
+      setDrops(data)
+      // Load first photo for each drop for thumbnail
+      await loadThumbnails(data)
+    }
+  }
+
+  const loadThumbnails = async (drops) => {
+    const thumbnails = {}
+    await Promise.all(drops.map(async (drop) => {
+      const { data } = await supabase
+        .from('photos')
+        .select('file_path')
+        .eq('drop_id', drop.id)
+        .order('order_index', { ascending: true })
+        .limit(1)
+      if (data && data.length > 0) {
+        const { data: urlData } = supabase.storage.from('photos').getPublicUrl(data[0].file_path)
+        thumbnails[drop.id] = urlData.publicUrl
+      }
+    }))
+    setDropPhotos(thumbnails)
   }
 
   const deleteDrop = async (id) => {
@@ -70,6 +99,7 @@ export default function Dashboard() {
 
   const activeDrops = drops.filter(d => getDaysLeft(d.expires_at) > 0)
   const totalViews = drops.reduce((sum, d) => sum + (d.view_count || 0), 0)
+  const totalPhotos = drops.reduce((sum, d) => sum + (d.photo_count || 0), 0)
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -90,7 +120,6 @@ export default function Dashboard() {
       }}>
         <PicdropLogo />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', display: 'none' }}>{user?.email}</div>
           <button onClick={handleSignOut} style={{
             background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: '13px',
             padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer'
@@ -100,19 +129,37 @@ export default function Dashboard() {
 
       <div style={{ maxWidth: '880px', margin: '0 auto', padding: '40px 24px' }}>
 
-        {/* HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '30px', color: '#1C1830', letterSpacing: '-0.02em', marginBottom: '4px' }}>Your drops</div>
-            <div style={{ fontSize: '14px', color: '#6B6485' }}>
-              {activeDrops.length} active · {drops.length} total · {totalViews} views
-            </div>
+        {/* GREETING HEADER */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '13px', color: '#9B8FE4', fontWeight: '500', marginBottom: '6px', letterSpacing: '0.02em' }}>
+            {getGreeting()}
           </div>
-          <button onClick={() => window.location.href = '/create'} style={{
-            background: '#6040C8', color: 'white', fontSize: '14px', fontWeight: '500',
-            padding: '11px 22px', borderRadius: '9px', border: 'none', cursor: 'pointer',
-            letterSpacing: '-0.01em'
-          }}>+ New drop</button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', color: '#1C1830', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              Your drops
+            </div>
+            <button onClick={() => window.location.href = '/create'} style={{
+              background: '#6040C8', color: 'white', fontSize: '14px', fontWeight: '500',
+              padding: '11px 22px', borderRadius: '9px', border: 'none', cursor: 'pointer',
+              letterSpacing: '-0.01em'
+            }}>+ New drop</button>
+          </div>
+
+          {/* STATS ROW */}
+          {drops.length > 0 && (
+            <div style={{ display: 'flex', gap: '24px', marginTop: '16px', flexWrap: 'wrap' }}>
+              {[
+                { val: activeDrops.length, label: 'active' },
+                { val: drops.length, label: 'total drops' },
+                { val: totalViews, label: totalViews === 1 ? 'view' : 'views' },
+              ].map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '5px' }}>
+                  <span style={{ fontSize: '18px', fontWeight: '600', color: '#1C1830', letterSpacing: '-0.02em' }}>{s.val}</span>
+                  <span style={{ fontSize: '12px', color: '#9B9BA8' }}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* DROPS LIST */}
@@ -144,25 +191,34 @@ export default function Dashboard() {
               const expired = daysLeft <= 0
               const urgent = !expired && daysLeft <= 3
               const copied = copiedId === drop.id
+              const thumbnail = dropPhotos[drop.id]
 
               return (
                 <div key={drop.id} style={{
                   background: '#fff',
                   border: `1px solid ${expired ? 'rgba(83,74,183,0.08)' : urgent ? 'rgba(220,100,60,0.25)' : 'rgba(83,74,183,0.12)'}`,
                   borderRadius: '14px',
-                  padding: '18px 20px',
+                  padding: '14px 16px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '16px',
+                  gap: '14px',
                   opacity: expired ? 0.45 : 1,
                   transition: 'border-color .15s'
                 }}>
 
-                  {/* VIBE DOT */}
+                  {/* THUMBNAIL */}
                   <div style={{
-                    width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
-                    background: expired ? '#D3D1C7' : urgent ? '#D85A30' : '#6040C8'
-                  }} />
+                    width: '52px', height: '52px', borderRadius: '9px',
+                    overflow: 'hidden', flexShrink: 0,
+                    background: '#EDE9F9',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    {thumbnail ? (
+                      <img src={thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontSize: '20px' }}>📷</span>
+                    )}
+                  </div>
 
                   {/* INFO */}
                   <div style={{ flex: 1, minWidth: 0 }}>
