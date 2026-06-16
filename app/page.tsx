@@ -64,7 +64,6 @@ export default function Home() {
       {/* HERO */}
       <div style={{ background: '#1C1830', padding: '96px 24px 80px', textAlign: 'center' }}>
         <div style={{ maxWidth: '740px', margin: '0 auto' }}>
-
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             fontSize: '12px', fontWeight: '500', color: '#9B8FE4',
@@ -137,32 +136,17 @@ export default function Home() {
           </div>
 
           {/* FEATURE LINE */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '6px', flexWrap: 'wrap', marginBottom: '64px'
-          }}>
-            {[
-              'Custom photo page',
-              'Your own link',
-              'Auto-expires',
-              'No account to view'
-            ].map((item, i, arr) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '64px' }}>
+            {['Custom photo page', 'Your own link', 'Auto-expires', 'No account to view'].map((item, i, arr) => (
               <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>{item}</span>
-                {i < arr.length - 1 && (
-                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.15)' }}>·</span>
-                )}
+                {i < arr.length - 1 && <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.15)' }}>·</span>}
               </div>
             ))}
           </div>
 
           {/* STATS */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '40px', flexWrap: 'wrap',
-            paddingTop: '32px',
-            borderTop: '1px solid rgba(255,255,255,0.06)'
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             {[
               { val: '30 days', label: 'max link life' },
               { val: '50 photos', label: 'per drop' },
@@ -180,7 +164,6 @@ export default function Home() {
       {/* MOCKUP DROPS SECTION */}
       <div style={{ background: '#13111F', padding: '80px 24px', width: '100%' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-
           <div style={{ textAlign: 'center', marginBottom: '52px' }}>
             <div style={{ fontSize: '11px', fontWeight: '600', color: '#9B8FE4', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
               See it in action
@@ -195,14 +178,27 @@ export default function Home() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             {mockups.map((m, mi) => (
-              <div key={mi} style={{
-                background: m.bg,
-                borderRadius: '16px',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.08)',
-                cursor: 'pointer',
-              }}
+              <div
+                key={mi}
                 onClick={() => window.location.href = '/create'}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-6px)'
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.5)'
+                  e.currentTarget.style.borderColor = 'rgba(155,143,228,0.3)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                }}
+                style={{
+                  background: m.bg,
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  cursor: 'pointer',
+                  transition: 'transform .2s ease, box-shadow .2s ease, border-color .2s ease',
+                }}
               >
                 {/* MOCK NAV */}
                 <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${m.vibe === 'clean' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}` }}>
@@ -232,7 +228,6 @@ export default function Home() {
                     <div style={{ fontSize: '13px', fontWeight: '500', color: '#ffffff', marginBottom: '2px', letterSpacing: '-0.01em' }}>{m.title}</div>
                     <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{m.caption}</div>
                   </div>
-                  {/* TAG */}
                   <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '9px', fontWeight: '600', padding: '3px 8px', borderRadius: '99px', background: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)', letterSpacing: '0.04em' }}>
                     {m.tag}
                   </div>
