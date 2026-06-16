@@ -108,7 +108,18 @@ export default function Create() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { window.location.href = '/login'; return }
+      if (!user) { window.location.href = '/login'; return }// Check free plan limit
+const { data: activeDrops } = await supabase
+  .from('drops')
+  .select('id')
+  .eq('user_id', user.id)
+  .gt('expires_at', new Date().toISOString())
+
+if (activeDrops && activeDrops.length >= 3) {
+  alert('You have reached the free plan limit of 3 active drops. Delete or wait for a drop to expire, or upgrade to Pro for unlimited drops.')
+  setLoading(false)
+  return
+}
 
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + expiry)
