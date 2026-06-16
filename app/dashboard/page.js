@@ -140,11 +140,23 @@ export default function Dashboard() {
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', color: '#1C1830', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
               Your drops
             </div>
-            <button onClick={() => window.location.href = '/create'} style={{
-              background: '#6040C8', color: 'white', fontSize: '14px', fontWeight: '500',
-              padding: '11px 22px', borderRadius: '9px', border: 'none', cursor: 'pointer',
-              letterSpacing: '-0.01em'
-            }}>+ New drop</button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+  <button onClick={() => window.location.href = '/create'} style={{
+    background: activeDrops.length >= 3 ? '#9B9BA8' : '#6040C8',
+    color: 'white', fontSize: '14px', fontWeight: '500',
+    padding: '11px 22px', borderRadius: '9px', border: 'none',
+    cursor: activeDrops.length >= 3 ? 'not-allowed' : 'pointer',
+    letterSpacing: '-0.01em'
+  }}>+ New drop</button>
+  <div style={{ fontSize: '11px', color: activeDrops.length >= 3 ? '#DC2626' : '#9B9BA8' }}>
+    {activeDrops.length}/3 drops used
+    {activeDrops.length >= 3 && (
+      <span onClick={() => window.location.href = '/pricing'} style={{ color: '#6040C8', cursor: 'pointer', marginLeft: '4px' }}>
+        · Upgrade
+      </span>
+    )}
+  </div>
+</div>
           </div>
 
           {/* STATS ROW */}
