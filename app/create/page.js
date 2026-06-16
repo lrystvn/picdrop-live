@@ -212,7 +212,7 @@ export default function Create() {
   return (
     <div style={{ minHeight: '100vh', background: '#F2F0F8', fontFamily: 'var(--font-inter)' }}>
       <nav style={{ background: 'rgba(28,24,48,0.96)', backdropFilter: 'blur(12px)', padding: `0 ${pad}`, height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <PicdropLogo onClick={() => window.location.href = '/'} />
+        <PicdropLogo onClick={() => window.location.href = '/dashboard'} />
         <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
           ← {isMobile ? 'Back' : 'Dashboard'}
         </div>

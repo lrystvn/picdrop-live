@@ -20,7 +20,7 @@ const SPACING = {
 }
 
 const PicdropLogo = ({ accent }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => window.location.href = '/dashboard'}>
     <div style={{ width: 20, height: 20, background: accent || '#6040C8', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
         <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>
@@ -305,7 +305,7 @@ export default function DropViewer() {
 
       {/* FOOTER */}
       <div style={{ maxWidth: '860px', margin: '36px auto 0', padding: `20px ${pad} 0`, borderTop: `1px solid ${v.border}`, fontSize: '12px', color: v.footerText, textAlign: 'center' }}>
-        Created with <strong style={{ fontFamily: 'system-ui, sans-serif', fontWeight: '600' }}>picdrop</strong> · Expires in {getDaysLeft()} days · <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => window.location.href = '/'}>Create your own</span>
+        Created with <strong style={{ fontFamily: 'system-ui, sans-serif', fontWeight: '600' }}>picdrop</strong> · Expires in {getDaysLeft()} days · <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => window.location.href = '/dashboard'}>Create your own</span>
       </div>
     </div>
   )

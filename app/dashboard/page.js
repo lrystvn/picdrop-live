@@ -120,10 +120,12 @@ export default function Dashboard() {
       }}>
         <PicdropLogo />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={handleSignOut} style={{
-            background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: '13px',
-            padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer'
-          }}>Sign out</button>
+          <div onClick={() => window.location.href = '/settings'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '6px 14px' }}>
+  Settings
+</div><button onClick={handleSignOut} style={{
+  background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: '13px',
+  padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer'
+}}>Sign out</button>
         </div>
       </nav>
 

@@ -1,6 +1,6 @@
 'use client'
 const PicdropLogo = ({ size = 22 }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={() => window.location.href = '/dashboard'}>
     <div style={{ width: size, height: size, background: '#6040C8', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <svg width={size * 0.65} height={size * 0.65} viewBox="0 0 14 14" fill="none">
         <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>

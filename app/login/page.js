@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { supabase } from '../supabase'
 
 const PicdropLogo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', justifyContent: 'center' }} onClick={() => window.location.href = '/'}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', justifyContent: 'center' }} onClick={() => window.location.href = '/dashboard'}>
     <div style={{ width: 24, height: 24, background: '#6040C8', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>

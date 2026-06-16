@@ -226,7 +226,7 @@ export default function EditDrop() {
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         position: 'sticky', top: 0, zIndex: 100
       }}>
-        <PicdropLogo onClick={() => window.location.href = '/'} />
+        <PicdropLogo onClick={() => window.location.href = '/dashboard'} />
         <div onClick={() => window.location.href = '/dashboard'} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
           ← Dashboard
         </div>
