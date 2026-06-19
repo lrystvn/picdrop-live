@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1200px;
+      height: 630px;
+      background: #1C1830;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+    .glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(96,64,200,0.4) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+    }
+    .glow2 {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(155,143,228,0.2) 0%, transparent 70%);
+      bottom: -100px;
+      left: -50px;
+    }
+    .content {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: #6040C8;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-text {
+      font-size: 48px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.04em;
+    }
+    .logo-text span {
+      color: #9B8FE4;
+    }
+    .tagline {
+      font-size: 28px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+      max-width: 700px;
+      margin: 0 auto 32px;
+      letter-spacing: -0.01em;
+    }
+    .pills {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pill {
+      font-size: 14px;
+      color: #9B8FE4;
+      border: 1px solid rgba(155,143,228,0.35);
+      padding: 6px 16px;
+      border-radius: 99px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="glow2"></div>
+  <div class="content">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.95"/>
+          <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+          <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+          <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="logo-text">pic<span>drop</span></div>
+    </div>
+    <div class="tagline">
+      Private photo sharing that disappears.<br/>Your photos. Your design. Your link.
+    </div>
+    <div class="pills">
+      <div class="pill">Custom photo page</div>
+      <div class="pill">Auto-expires</div>
+      <div class="pill">No account to view</div>
+      <div class="pill">Private by default</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -24,6 +24,20 @@ export const metadata: Metadata = {
     url: "https://picdrop.live",
     siteName: "Picdrop",
     type: "website",
+    images: [
+      {
+        url: "https://picdrop.live/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Picdrop — Private photo sharing that disappears",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Picdrop — Private photo sharing that disappears",
+    description: "Create a custom photo page in seconds. Share it privately with the right people. It disappears automatically.",
+    images: ["https://picdrop.live/og-image.png"],
   },
 };
 
