@@ -64,6 +64,7 @@ export default function Home() {
       {/* HERO */}
       <div style={{ background: '#1C1830', padding: '96px 24px 80px', textAlign: 'center' }}>
         <div style={{ maxWidth: '740px', margin: '0 auto' }}>
+
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             fontSize: '12px', fontWeight: '500', color: '#9B8FE4',
@@ -84,32 +85,29 @@ export default function Home() {
             letterSpacing: '-0.02em',
             fontWeight: '400'
           }}>
-            Share your photos with<br />
-            <em style={{ color: '#9B8FE4' }}>the right people, instantly.</em>
+            Not a group chat.<br />
+            <em style={{ color: '#9B8FE4' }}>A page worth sharing.</em>
           </h1>
 
           <p style={{
             fontSize: '18px',
             color: 'rgba(255,255,255,0.55)',
             lineHeight: 1.75,
-            marginBottom: '16px',
             maxWidth: '520px',
             margin: '0 auto 16px'
           }}>
-            Create a custom photo page in seconds — your vibe, your layout, your link.
-            Share it privately. It disappears automatically.
+            Create a designed photo page in seconds. Pick your vibe, set your link, share privately with exactly who you want.
           </p>
 
           <p style={{
             fontSize: '15px',
             color: 'rgba(255,255,255,0.35)',
             lineHeight: 1.7,
-            marginBottom: '40px',
             maxWidth: '480px',
             margin: '0 auto 40px'
           }}>
-            No cloud folders. No social media post. No group chat chaos.
-            Just a link that works for the people who matter.
+            No Google Drive folders. No social media. No 47-photo group chat.
+            Just a clean page that disappears when you're done.
           </p>
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '32px' }}>
@@ -137,7 +135,12 @@ export default function Home() {
 
           {/* FEATURE LINE */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '64px' }}>
-            {['Custom photo page', 'Your own link', 'Auto-expires', 'No account to view'].map((item, i, arr) => (
+            {[
+              'Your photos, your design',
+              'Private link',
+              'Auto-expires',
+              'No sign-up to view'
+            ].map((item, i, arr) => (
               <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>{item}</span>
                 {i < arr.length - 1 && <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.15)' }}>·</span>}
@@ -148,9 +151,9 @@ export default function Home() {
           {/* STATS */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             {[
-              { val: '30 days', label: 'max link life' },
+              { val: '6 vibes', label: 'to make it yours' },
               { val: '50 photos', label: 'per drop' },
-              { val: '0', label: 'social accounts needed to view' },
+              { val: '0', label: 'accounts needed to view' },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '22px', fontWeight: '500', color: '#ffffff', fontFamily: 'var(--font-serif)', letterSpacing: '-0.02em' }}>{s.val}</div>
@@ -169,10 +172,10 @@ export default function Home() {
               See it in action
             </div>
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(26px, 3.5vw, 38px)', color: '#ffffff', lineHeight: 1.15 }}>
-              What a drop looks like.
+              A drop looks like this.
             </div>
             <div style={{ fontSize: '15px', color: 'rgba(255,255,255,0.4)', marginTop: '12px', lineHeight: 1.6 }}>
-              Every drop is a designed photo page — not a file link.
+              Not a file dump. A page you'd actually want to share.
             </div>
           </div>
 
