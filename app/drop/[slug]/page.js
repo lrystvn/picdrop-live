@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../supabase'
-import Head from 'next/head'
 
 const VIBES = {
   electric: { bg: '#1C1830', navBg: '#12101F', accent: '#9B8FE4', text: '#ffffff', subtext: 'rgba(255,255,255,0.5)', font: 'Georgia, serif', border: 'rgba(255,255,255,0.08)', footerText: 'rgba(255,255,255,0.25)' },
