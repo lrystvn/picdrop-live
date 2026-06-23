@@ -1,5 +1,5 @@
 import { generateDropMetadata } from './metadata'
-import DropViewer from './DropViewer'
+import DropViewer from './dropviewer'
 
 export async function generateMetadata({ params }) {
   return generateDropMetadata(params.slug)
