@@ -46,7 +46,8 @@ export default function DropViewer() {
   const [pwError, setPwError] = useState('')
   const [lightbox, setLightbox] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
-  const [isOwner, setIsOwner] = useState(false)
+  const [isOwner, setIsOwner] = useState(false) 
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 600)
@@ -202,14 +203,23 @@ export default function DropViewer() {
         <PicdropLogo accent={v.accent} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isOwner ? (
-            <>
-              <button onClick={() => window.location.href = `/edit/${slug}`} style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
-                Edit
-              </button>
-              <button onClick={() => window.location.href = '/dashboard'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                {isMobile ? 'Dashboard' : '← Dashboard'}
-              </button>
-            </>
+  <>
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(`https://picdrop.live/drop/${slug}`)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+      }}
+      style={{ background: copied ? 'rgba(15,110,86,0.3)' : 'rgba(255,255,255,0.1)', color: copied ? '#5DCAA5' : 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: `1px solid ${copied ? 'rgba(15,110,86,0.4)' : 'rgba(255,255,255,0.15)'}`, cursor: 'pointer', transition: 'all .15s' }}>
+      {copied ? '✓ Copied' : 'Copy link'}
+    </button>
+    <button onClick={() => window.location.href = `/edit/${slug}`} style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
+      Edit
+    </button>
+    <button onClick={() => window.location.href = '/dashboard'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+      {isMobile ? 'Dashboard' : '← Dashboard'}
+    </button>
+  </>
           ) : (
             <button onClick={() => window.location.href = '/create'} style={{ background: v.accent, color: isDark ? '#000' : '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 14px', borderRadius: '9px', border: 'none', cursor: 'pointer' }}>
               {isMobile ? '+ Create' : '+ Create your own'}
