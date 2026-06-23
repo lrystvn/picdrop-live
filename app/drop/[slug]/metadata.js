@@ -1,6 +1,11 @@
-import { supabase } from '../../supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export async function generateDropMetadata(slug) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+
   const { data: drop } = await supabase
     .from('drops')
     .select('title, caption')
