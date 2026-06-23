@@ -90,13 +90,15 @@ export default function Create() {
     setDragIndex(null); setDragOverIndex(null)
   }
 
-  const checkSlug = async (val) => {
-    setSlug(val)
-    if (!val) { setSlugStatus(''); return }
-    const { data } = await supabase.from('drops').select('slug').eq('slug', val.toLowerCase()).single()
-    if (data) setSlugStatus('taken')
-    else setSlugStatus('available')
-  }
+const checkSlug = async (val) => {
+  // Auto-fix: replace spaces with dashes, remove special characters
+  const cleaned = val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  setSlug(cleaned)
+  if (!cleaned) { setSlugStatus(''); return }
+  const { data } = await supabase.from('drops').select('slug').eq('slug', cleaned).single()
+  if (data) setSlugStatus('taken')
+  else setSlugStatus('available')
+}
 
   const handlePublish = async () => {
     if (!title) { alert('Please add a title'); return }

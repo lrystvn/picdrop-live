@@ -81,8 +81,8 @@ export default function Dashboard() {
     setDrops(prev => prev.filter(d => d.id !== id))
   }
 
-  const copyLink = (drop) => {
-    navigator.clipboard.writeText(`picdrop.live/drop/${drop.slug}`)
+const copyLink = (drop) => {
+  navigator.clipboard.writeText(`https://picdrop.live/drop/${drop.slug}`)
     setCopiedId(drop.id)
     setTimeout(() => setCopiedId(null), 1500)
   }
