@@ -172,16 +172,6 @@ export default function DropViewer() {
   return (
     <div style={{ minHeight: '100vh', background: v.bg, paddingBottom: '56px', fontFamily: v.font }}>
 
-      <Head>
-        <title>{drop.title} — Picdrop</title>
-        <meta property="og:title" content={`${drop.title} — Picdrop`} />
-        <meta property="og:description" content={drop.caption || `${drop.title} · Shared privately on Picdrop`} />
-        <meta property="og:image" content="https://picdrop.live/og-image.png" />
-        <meta property="og:url" content={`https://picdrop.live/drop/${slug}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${drop.title} — Picdrop`} />
-        <meta name="twitter:description" content={drop.caption || `${drop.title} · Shared privately on Picdrop`} />
-      </Head>
 
       {/* LIGHTBOX */}
       {lightbox !== null && (
