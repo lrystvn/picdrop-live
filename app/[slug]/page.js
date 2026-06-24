@@ -6,7 +6,7 @@ export default function SlugRedirect() {
   const { slug } = useParams()
   
   useEffect(() => {
-    window.location.href = `https://picdrop.live/drop/${slug}`
+    window.location.replace(`/drop/${slug}`)
   }, [slug])
 
   return null
