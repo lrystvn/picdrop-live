@@ -13,6 +13,7 @@ const VIBES = {
   film: { bg: '#1C1410', navBg: '#120E09', accent: '#D4A853', text: '#F5ECD7', subtext: 'rgba(245,236,215,0.5)', font: 'Space Mono, monospace', border: 'rgba(212,168,83,0.15)', footerText: 'rgba(245,236,215,0.25)' },
 }
 
+
 const SPACING = {
   tight: { gap: '0px', borderRadius: '0px' },
   normal: { gap: '4px', borderRadius: '14px' },
